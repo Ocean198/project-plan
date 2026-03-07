@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "board": "Board",
+    "dashboard": "Dashboard",
+    "list": "List",
+    "activity": "Activity",
+    "admin": "Admin"
+  },
+  "board": {
+    "title": "Kanban Board",
+    "subtitle": "Move tasks between sprints with drag & drop",
+    "noTasks": "No tasks in this sprint",
+    "filterReset": "Reset filters"
+  },
+  "status": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "completed": "Completed"
+  },
+  "lock": {
+    "open": "Open",
+    "soft_locked": "Soft-Locked",
+    "hard_locked": "Hard-Locked"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "undo": "Undo",
+    "export": "Export",
+    "refresh": "Refresh"
+  },
+  "cascade": {
+    "title": "Move task",
+    "warning": "This action will move {count} more {count, plural, one {task} other {tasks}} to the next month. Continue?",
+    "showAffected": "Show affected tasks",
+    "confirm": "Confirm move"
+  },
+  "toast": {
+    "moved": "Task moved successfully.",
+    "moveError": "Move failed.",
+    "completed": "Task completed.",
+    "statusError": "Status change failed.",
+    "networkError": "Network error."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of AP utilization and velocity",
+    "openTasks": "Open Tasks",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "capacityTitle": "AP Utilization – Next 6 Sprints",
+    "capacitySubtitle": "Orange line = 90% warning threshold",
+    "velocityTitle": "Velocity – Completed AP per Month",
+    "velocitySubtitle": "Last 12 months, 6-month average",
+    "warningBanner": "{count} {count, plural, one {sprint} other {sprints}} near or at capacity"
+  },
+  "list": {
+    "title": "List View",
+    "subtitle": "All tasks in table format, sortable and filterable",
+    "allStatus": "All Statuses",
+    "allLocations": "All Locations",
+    "allSprints": "All Sprints",
+    "searchPlaceholder": "Search by title, description, ticket ID...",
+    "resetFilters": "Reset",
+    "noResults": "No tasks found."
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Manage locations, users, sprints and webhooks",
+    "locations": "Locations",
+    "users": "Users",
+    "sprints": "Sprints",
+    "webhooks": "Webhooks"
+  },
+  "login": {
+    "welcome": "Welcome back",
+    "subtitle": "Sign in to continue.",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "loading": "Signing in...",
+    "error": "Invalid email address or password."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications",
+    "cascade_triggered": "Cascade triggered",
+    "sprint_locked": "Sprint locked",
+    "capacity_changed": "AP budget changed",
+    "task_imported": "Task imported"
+  }
+}

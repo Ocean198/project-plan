@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "board": "Board",
+    "dashboard": "Dashboard",
+    "list": "Liste",
+    "activity": "Aktivität",
+    "admin": "Admin"
+  },
+  "board": {
+    "title": "Kanban-Board",
+    "subtitle": "Aufgaben per Drag & Drop zwischen Sprints verschieben",
+    "noTasks": "Keine Aufgaben in diesem Sprint",
+    "filterReset": "Filter zurücksetzen"
+  },
+  "status": {
+    "open": "Offen",
+    "in_progress": "In Bearbeitung",
+    "completed": "Abgeschlossen"
+  },
+  "lock": {
+    "open": "Offen",
+    "soft_locked": "Soft-Lock",
+    "hard_locked": "Hard-Lock"
+  },
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "create": "Anlegen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "undo": "Rückgängig",
+    "export": "Exportieren",
+    "refresh": "Aktualisieren"
+  },
+  "cascade": {
+    "title": "Aufgabe verschieben",
+    "warning": "Diese Aktion verschiebt {count} weitere {count, plural, one {Aufgabe} other {Aufgaben}} in den nächsten Monat. Fortfahren?",
+    "showAffected": "Betroffene Aufgaben anzeigen",
+    "confirm": "Verschieben bestätigen"
+  },
+  "toast": {
+    "moved": "Aufgabe erfolgreich verschoben.",
+    "moveError": "Verschiebung fehlgeschlagen.",
+    "completed": "Aufgabe abgeschlossen.",
+    "statusError": "Statusänderung fehlgeschlagen.",
+    "networkError": "Netzwerkfehler."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Übersicht über AP-Auslastung und Velocity",
+    "openTasks": "Offene Aufgaben",
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "capacityTitle": "AP-Auslastung – Nächste 6 Sprints",
+    "capacitySubtitle": "Orangene Linie = 90%-Warnschwelle",
+    "velocityTitle": "Velocity – Abgeschlossene AP pro Monat",
+    "velocitySubtitle": "Letzte 12 Monate, Durchschnitt der letzten 6 Monate",
+    "warningBanner": "{count} {count, plural, one {Sprint} other {Sprints}} fast oder vollständig ausgelastet"
+  },
+  "list": {
+    "title": "Listenansicht",
+    "subtitle": "Alle Aufgaben tabellarisch, sortierbar und filterbar",
+    "allStatus": "Alle Status",
+    "allLocations": "Alle Standorte",
+    "allSprints": "Alle Sprints",
+    "searchPlaceholder": "Suche nach Titel, Beschreibung, Ticket-ID...",
+    "resetFilters": "Zurücksetzen",
+    "noResults": "Keine Aufgaben gefunden."
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Standorte, User, Sprints und Webhooks verwalten",
+    "locations": "Standorte",
+    "users": "User",
+    "sprints": "Sprints",
+    "webhooks": "Webhooks"
+  },
+  "login": {
+    "welcome": "Willkommen zurück",
+    "subtitle": "Melde dich an, um fortzufahren.",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "loading": "Anmelden...",
+    "error": "Ungültige E-Mail-Adresse oder Passwort."
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen",
+    "empty": "Keine Benachrichtigungen",
+    "cascade_triggered": "Cascade ausgelöst",
+    "sprint_locked": "Sprint gesperrt",
+    "capacity_changed": "AP-Budget geändert",
+    "task_imported": "Aufgabe importiert"
+  }
+}

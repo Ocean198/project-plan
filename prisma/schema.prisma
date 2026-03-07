@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Location {
+  id                    Int               @id @default(autoincrement())
+  name                  String
+  color                 String
+  default_action_points Int?
+  is_active             Boolean           @default(true)
+  created_at            DateTime          @default(now())
+  updated_at            DateTime          @updatedAt
+
+  sprint_capacities     SprintCapacity[]
+  tasks                 Task[]
+  user_locations        UserLocation[]
+
+  @@map("locations")
+}
+
+model Sprint {
+  id          Int               @id @default(autoincrement())
+  year        Int
+  month       Int               // Kalendermonat 1–12 (monatlich/nummeriert), 0 bei wöchentlich
+  week        Int               @default(0) // ISO-Wochennummer 1–53 (wöchentlich), 0 sonst
+  label       String
+  lock_status SprintLockStatus  @default(open)
+  is_archived Boolean           @default(false)
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+
+  capacities  SprintCapacity[]
+  tasks       Task[]
+
+  @@unique([year, month, week])
+  @@map("sprints")
+}
+
+enum SprintLockStatus {
+  open
+  soft_locked
+  hard_locked
+}
+
+model SprintCapacity {
+  id                Int      @id @default(autoincrement())
+  sprint_id         Int
+  location_id       Int
+  max_action_points Int
+
+  sprint            Sprint   @relation(fields: [sprint_id], references: [id], onDelete: Cascade)
+  location          Location @relation(fields: [location_id], references: [id], onDelete: Cascade)
+
+  @@unique([sprint_id, location_id])
+  @@map("sprint_capacities")
+}
+
+model Task {
+  id                 Int        @id @default(autoincrement())
+  title              String
+  description        String?    @db.Text
+  action_points      Int
+  location_id        Int
+  sprint_id          Int
+  status             TaskStatus @default(open)
+  priority           Int        @default(0)
+  external_ticket_id String?    @unique
+  completed_at       DateTime?
+  created_by         Int
+  created_at         DateTime   @default(now())
+  updated_at         DateTime   @updatedAt
+
+  location           Location   @relation(fields: [location_id], references: [id])
+  sprint             Sprint     @relation(fields: [sprint_id], references: [id])
+  creator            User       @relation(fields: [created_by], references: [id])
+
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  open
+  in_progress
+  completed
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  name       String
+  email      String       @unique
+  password   String
+  role       UserRole     @default(viewer)
+  locale     UserLocale   @default(de)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+
+  tasks          Task[]
+  user_locations UserLocation[]
+  notifications  Notification[]
+  activity_logs  ActivityLog[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  viewer
+  sales
+  admin
+}
+
+enum UserLocale {
+  de
+  en
+}
+
+model UserLocation {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  location_id Int
+
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location    Location @relation(fields: [location_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, location_id])
+  @@map("user_locations")
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  user_id    Int
+  type       NotificationType
+  title      String
+  message    String           @db.Text
+  link       String?
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  user       User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  cascade_triggered
+  sprint_locked
+  capacity_changed
+  task_imported
+}
+
+model ActivityLog {
+  id          Int               @id @default(autoincrement())
+  user_id     Int?
+  action      ActivityAction
+  target_type ActivityTargetType
+  target_id   Int
+  details     Json?
+  created_at  DateTime          @default(now())
+
+  user        User?              @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@map("activity_log")
+}
+
+enum ActivityAction {
+  task_created
+  task_moved
+  task_completed
+  task_priority_changed
+  cascade_triggered
+  sprint_locked
+  sprint_unlocked
+  sprint_created
+  capacity_changed
+  task_imported
+  location_created
+  user_created
+}
+
+enum ActivityTargetType {
+  task
+  sprint
+  sprint_capacity
+  location
+  user
+}
+
+model WebhookEndpoint {
+  id               Int             @id @default(autoincrement())
+  name             String
+  url              String
+  secret           String
+  events           Json
+  is_active        Boolean         @default(true)
+  last_status      WebhookStatus?
+  last_triggered_at DateTime?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+
+  @@map("webhook_endpoints")
+}
+
+enum WebhookStatus {
+  success
+  failed
+  pending
+}
+
+model AppSetting {
+  key   String @id @map("setting_key")
+  value String @map("setting_value") @db.Text
+
+  @@map("app_settings")
+}
