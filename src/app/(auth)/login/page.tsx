@@ -148,11 +148,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-400 text-center">
-              Test: <span className="font-mono">admin@sprintboard.local</span> / <span className="font-mono">admin123</span>
-            </p>
-          </div>
         </div>
       </div>
     </div>
