@@ -21,8 +21,9 @@ export async function POST(req: Request) {
   const body = await parseBody<{
     title: string;
     description?: string;
-    action_points: number;
-    location_id: number;
+    action_points?: number;
+    location_id?: number;
+    location_name?: string;
     external_ticket_id: string;
   }>(req);
 
@@ -30,14 +31,17 @@ export async function POST(req: Request) {
 
   // Validierung
   if (!body.title?.trim()) return badRequest("Titel ist erforderlich.");
-  if (![1, 2, 3].includes(body.action_points)) return badRequest("action_points muss 1, 2 oder 3 sein.");
-  if (!body.location_id) return badRequest("location_id ist erforderlich.");
+  const action_points = body.action_points ?? 1;
+  if (![1, 2, 3].includes(action_points)) return badRequest("action_points muss 1, 2 oder 3 sein.");
+  if (!body.location_id && !body.location_name) return badRequest("location_id oder location_name ist erforderlich.");
 
   try {
     // Standort prüfen
-    const location = await prisma.location.findUnique({ where: { id: body.location_id } });
+    const location = body.location_id
+      ? await prisma.location.findUnique({ where: { id: body.location_id } })
+      : await prisma.location.findFirst({ where: { name: body.location_name!, is_active: true } });
     if (!location) {
-      return NextResponse.json({ error: "location_id existiert nicht." }, { status: 404 });
+      return NextResponse.json({ error: "Standort nicht gefunden." }, { status: 404 });
     }
     if (!location.is_active) {
       return NextResponse.json({ error: "Der Standort ist deaktiviert." }, { status: 404 });
@@ -71,14 +75,14 @@ export async function POST(req: Request) {
 
     const fromSprintId = currentSprint?.id ?? 1;
     const targetSprint = await findEarliestSprintWithCapacity(
-      body.location_id,
-      body.action_points,
+      location.id,
+      action_points,
       fromSprintId
     );
 
     // Priorität ans Ende setzen
     const maxPriority = await prisma.task.aggregate({
-      where: { sprint_id: targetSprint.id, location_id: body.location_id },
+      where: { sprint_id: targetSprint.id, location_id: location.id },
       _max: { priority: true },
     });
     const nextPriority = (maxPriority._max.priority ?? 0) + 1;
@@ -87,8 +91,8 @@ export async function POST(req: Request) {
       data: {
         title: body.title.trim(),
         description: body.description?.trim() ?? null,
-        action_points: body.action_points,
-        location_id: body.location_id,
+        action_points,
+        location_id: location.id,
         sprint_id: targetSprint.id,
         status: "open",
         priority: nextPriority,
@@ -101,11 +105,11 @@ export async function POST(req: Request) {
       title: task.title,
       external_ticket_id: body.external_ticket_id ?? "",
       sprint_id: targetSprint.id,
-      location_id: body.location_id,
+      location_id: location.id,
     });
 
     await notifyTaskImported({
-      locationId: body.location_id,
+      locationId: location.id,
       locationName: location.name,
       taskTitle: task.title,
       externalTicketId: body.external_ticket_id,
@@ -118,7 +122,7 @@ export async function POST(req: Request) {
         title: task.title,
         action_points: task.action_points,
         location: location.name,
-        location_id: body.location_id,
+        location_id: location.id,
         assigned_sprint: targetSprint.label,
         sprint_id: targetSprint.id,
         status: "open",
