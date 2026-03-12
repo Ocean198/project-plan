@@ -26,11 +26,11 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   completed: { label: "Abgeschlossen", classes: "bg-green-100 text-green-700" },
 };
 
-const AP_COLORS: Record<number, string> = {
-  1: "bg-green-100 text-green-700",
-  2: "bg-yellow-100 text-yellow-700",
-  3: "bg-red-100 text-red-700",
-};
+function getApColor(sp: number): string {
+  if (sp <= 3) return "bg-green-100 text-green-700";
+  if (sp <= 6) return "bg-yellow-100 text-yellow-700";
+  return "bg-red-100 text-red-700";
+}
 
 interface TaskDetailModalProps {
   task: BoardTask;
@@ -95,7 +95,7 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action_points: newSP }),
       });
-      if (res.ok) setCurrentActionPoints(newSP as 1 | 2 | 3);
+      if (res.ok) setCurrentActionPoints(newSP);
     } finally {
       setSavingSP(false);
     }
@@ -165,24 +165,21 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
             {canEditSP ? (
-              <div className="flex items-center gap-1">
-                {[1, 2, 3].map((sp) => (
-                  <button
-                    key={sp}
-                    onClick={() => handleSPChange(sp)}
-                    disabled={savingSP}
-                    className={`text-xs font-bold px-2 py-1 rounded transition border ${
-                      currentActionPoints === sp
-                        ? AP_COLORS[sp] + " border-transparent"
-                        : "border-gray-200 text-gray-400 hover:border-gray-300 bg-white"
-                    } disabled:opacity-50`}
-                  >
-                    {sp} SP
-                  </button>
-                ))}
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={currentActionPoints}
+                  onChange={(e) => handleSPChange(parseInt(e.target.value))}
+                  disabled={savingSP}
+                  className={`text-xs font-bold px-2 py-1 rounded border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 cursor-pointer ${getApColor(currentActionPoints)}`}
+                >
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((sp) => (
+                    <option key={sp} value={sp}>{sp} SP</option>
+                  ))}
+                </select>
+                {savingSP && <span className="text-xs text-gray-400">Speichern...</span>}
               </div>
             ) : (
-              <span className={`text-xs font-bold px-2 py-1 rounded ${AP_COLORS[currentActionPoints]}`}>
+              <span className={`text-xs font-bold px-2 py-1 rounded ${getApColor(currentActionPoints)}`}>
                 {currentActionPoints} Story {currentActionPoints === 1 ? "Point" : "Points"}
               </span>
             )}

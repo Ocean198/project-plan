@@ -93,7 +93,7 @@ export async function PATCH(
     if (body.description !== undefined) updateData.description = body.description.trim() || null;
     if (body.action_points !== undefined) {
       if (!canEditSP) return forbidden("Keine Berechtigung für Story Points.");
-      if (![1, 2, 3].includes(body.action_points)) return badRequest("Story Points müssen 1, 2 oder 3 sein.");
+      if (!Number.isInteger(body.action_points) || body.action_points < 1 || body.action_points > 10) return badRequest("Story Points müssen zwischen 1 und 10 liegen.");
       updateData.action_points = body.action_points;
     }
     if (body.priority !== undefined) {

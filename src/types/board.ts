@@ -16,7 +16,7 @@ export interface BoardTask {
   id: number;
   title: string;
   description: string | null;
-  action_points: 1 | 2 | 3;
+  action_points: number;
   status: "open" | "in_progress" | "completed";
   priority: number;
   external_ticket_id: string | null;

@@ -4,11 +4,11 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { BoardTask } from "@/types/board";
 
-const AP_COLORS: Record<number, { bg: string; text: string; label: string }> = {
-  1: { bg: "bg-green-100", text: "text-green-700", label: "1 SP" },
-  2: { bg: "bg-yellow-100", text: "text-yellow-700", label: "2 SP" },
-  3: { bg: "bg-red-100", text: "text-red-700", label: "3 SP" },
-};
+function getApColor(sp: number): { bg: string; text: string } {
+  if (sp <= 3) return { bg: "bg-green-100", text: "text-green-700" };
+  if (sp <= 6) return { bg: "bg-yellow-100", text: "text-yellow-700" };
+  return { bg: "bg-red-100", text: "text-red-700" };
+}
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   open: { label: "Offen", classes: "bg-gray-100 text-gray-500" },
@@ -40,7 +40,7 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
     transition,
   };
 
-  const ap = AP_COLORS[task.action_points] ?? AP_COLORS[1];
+  const ap = getApColor(task.action_points);
   const statusCfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.open;
   const isCompleted = task.status === "completed";
   const isInProgress = task.status === "in_progress";
@@ -87,9 +87,9 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
             {task.location.name}
           </span>
 
-          {/* AP-Badge */}
+          {/* SP-Badge */}
           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold ${ap.bg} ${ap.text}`}>
-            {ap.label}
+            {task.action_points} SP
           </span>
 
           {/* Status-Badge */}
@@ -113,7 +113,7 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
 
 /** Phantom-Karte während Drag & Drop */
 export function TaskCardOverlay({ task }: { task: BoardTask }) {
-  const ap = AP_COLORS[task.action_points] ?? AP_COLORS[1];
+  const ap = getApColor(task.action_points);
 
   return (
     <div className="relative bg-white rounded-xl border border-blue-300 shadow-xl rotate-2 w-64">
@@ -125,7 +125,7 @@ export function TaskCardOverlay({ task }: { task: BoardTask }) {
         <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">{task.title}</p>
         <div className="mt-2 flex items-center gap-1.5">
           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold ${ap.bg} ${ap.text}`}>
-            {ap.label}
+            {task.action_points} SP
           </span>
         </div>
       </div>
