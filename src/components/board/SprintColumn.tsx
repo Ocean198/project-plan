@@ -74,12 +74,13 @@ interface SprintColumnProps {
   canDrag: boolean;
   activeTask?: BoardTask | null;
   overId?: string | null;
-  isAdmin?: boolean;
+  canLock?: boolean;
+  canArchive?: boolean;
   onLockChange?: (sprintId: number, newStatus: LockStatus) => void;
   onArchive?: (sprintId: number) => void;
 }
 
-export function SprintColumn({ sprint, tasks, onTaskClick, canDrag, activeTask, overId, isAdmin, onLockChange, onArchive }: SprintColumnProps) {
+export function SprintColumn({ sprint, tasks, onTaskClick, canDrag, activeTask, overId, canLock, canArchive, onLockChange, onArchive }: SprintColumnProps) {
   const isHardLocked = sprint.lock_status === "hard_locked";
 
   const { setNodeRef, isOver } = useDroppable({
@@ -111,7 +112,7 @@ export function SprintColumn({ sprint, tasks, onTaskClick, canDrag, activeTask, 
             </span>
             <LockToggle
               status={sprint.lock_status as LockStatus}
-              isAdmin={!!isAdmin}
+              isAdmin={!!canLock}
               onClick={() => onLockChange?.(sprint.id, LOCK_NEXT[sprint.lock_status as LockStatus])}
             />
           </div>
@@ -171,8 +172,8 @@ export function SprintColumn({ sprint, tasks, onTaskClick, canDrag, activeTask, 
         </SortableContext>
       </div>
 
-      {/* Archivieren-Button (nur für Admins) */}
-      {isAdmin && (
+      {/* Archivieren-Button */}
+      {canArchive && (
         <div className="px-3 pb-3">
           <button
             onClick={() => onArchive?.(sprint.id)}

@@ -21,9 +21,11 @@ import { TaskCard, TaskCardOverlay } from "./TaskCard";
 import { CascadeConfirmDialog } from "./CascadeConfirmDialog";
 import { TaskDetailModal } from "./TaskDetailModal";
 import type { BoardTask, BoardSprint, ActiveFilters, CascadePreview, LocationInfo } from "@/types/board";
+import { can, type RolePermissions } from "@/lib/permissions";
 
 interface KanbanBoardProps {
   userRole: string;
+  permissions: RolePermissions;
 }
 
 interface PendingMove {
@@ -34,7 +36,7 @@ interface PendingMove {
   insertBeforeTaskId?: number;
 }
 
-export function KanbanBoard({ userRole }: KanbanBoardProps) {
+export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
   const { sprints, tasks, setTasks, loading, error, refetch, silentRefetch } = useBoardData();
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
   const [liveOverId, setLiveOverId] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error"; undoAction?: () => void } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const canDrag = userRole === "sales" || userRole === "admin";
+  const canDrag = can(userRole, 'board.move_tasks', permissions);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -486,7 +488,8 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
                 canDrag={canDrag}
                 activeTask={activeTask}
                 overId={liveOverId}
-                isAdmin={userRole === "admin"}
+                canLock={can(userRole, 'sprints.lock_unlock', permissions)}
+                canArchive={can(userRole, 'sprints.archive', permissions)}
                 onLockChange={handleLockChange}
                 onArchive={(sprintId) => {
                   const sprint = sprints.find((s) => s.id === sprintId);
@@ -545,9 +548,10 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
         <TaskDetailModal
           task={selectedTask}
           userRole={userRole}
+          permissions={permissions}
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleStatusChange}
-          onDelete={userRole === "admin" ? handleDeleteTask : undefined}
+          onDelete={can(userRole, 'board.delete_tasks', permissions) ? handleDeleteTask : undefined}
         />
       )}
 

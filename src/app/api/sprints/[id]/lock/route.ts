@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
-  getSession, hasRole, unauthorized, forbidden, badRequest,
+  getSession, unauthorized, forbidden, badRequest,
   notFound, serverError, parseBody,
 } from "@/lib/api-helpers";
 import { setSprintLockStatus } from "@/lib/sprint-manager";
 import { logSprintLocked, logSprintUnlocked } from "@/lib/activity-logger";
 import { notifySprintLocked } from "@/lib/notification-service";
 import type { SprintLockStatus } from "@prisma/client";
+import { getPermissions, can } from "@/lib/permissions";
 
 // POST /api/sprints/[id]/lock
 export async function POST(
@@ -16,7 +17,8 @@ export async function POST(
 ) {
   const session = await getSession();
   if (!session) return unauthorized();
-  if (!hasRole(session, "admin")) return forbidden();
+  const permissions = await getPermissions();
+  if (!can(session.user.role, 'sprints.lock_unlock', permissions)) return forbidden();
 
   const { id } = await params;
   const sprintId = parseInt(id);

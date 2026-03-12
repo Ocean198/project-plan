@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { BoardTask } from "@/types/board";
+import { can, type RolePermissions } from "@/lib/permissions";
 
 interface ActivityEntry {
   id: number;
@@ -34,12 +35,13 @@ const AP_COLORS: Record<number, string> = {
 interface TaskDetailModalProps {
   task: BoardTask;
   userRole: string;
+  permissions: RolePermissions;
   onClose: () => void;
   onStatusChange: (taskId: number, status: "open" | "in_progress" | "completed") => Promise<void>;
   onDelete?: (taskId: number) => Promise<void>;
 }
 
-export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDelete }: TaskDetailModalProps) {
+export function TaskDetailModal({ task, userRole, permissions, onClose, onStatusChange, onDelete }: TaskDetailModalProps) {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [changingStatus, setChangingStatus] = useState(false);
@@ -48,7 +50,7 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDel
   const [deleting, setDeleting] = useState(false);
 
   const isCompleted = currentStatus === "completed";
-  const canEdit = (userRole === "sales" || userRole === "admin") && !isCompleted;
+  const canEdit = can(userRole, 'board.change_status', permissions) && !isCompleted;
   const isHardLocked = task.sprint.lock_status === "hard_locked";
 
   useEffect(() => {
@@ -205,12 +207,12 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDel
           )}
 
           {/* Admin-Aktionen */}
-          {userRole === "admin" && (
+          {(can(userRole, 'board.reopen_tasks', permissions) || can(userRole, 'board.delete_tasks', permissions)) && (
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Admin-Aktion</p>
               <div className="flex flex-col gap-2">
                 {/* Abgeschlossene Aufgabe wieder öffnen */}
-                {isCompleted && (
+                {can(userRole, 'board.reopen_tasks', permissions) && isCompleted && (
                   <button
                     onClick={async () => {
                       if (changingStatus) return;
@@ -234,7 +236,7 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDel
                 )}
 
                 {/* Aufgabe löschen */}
-                {!deleteConfirm ? (
+                {can(userRole, 'board.delete_tasks', permissions) && !deleteConfirm ? (
                   <button
                     onClick={() => setDeleteConfirm(true)}
                     className="w-full py-2 rounded-lg text-xs font-medium border border-red-200 text-red-600 hover:bg-red-50 transition flex items-center justify-center gap-1.5"
@@ -245,7 +247,7 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDel
                     </svg>
                     Aufgabe löschen
                   </button>
-                ) : (
+                ) : can(userRole, 'board.delete_tasks', permissions) ? (
                   <div className="border border-red-200 rounded-lg p-3 bg-red-50">
                     <p className="text-xs text-red-700 font-medium mb-2">Wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</p>
                     <div className="flex gap-2">
@@ -265,7 +267,7 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDel
                       </button>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           )}

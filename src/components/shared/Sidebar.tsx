@@ -76,17 +76,24 @@ const navItems: NavItem[] = [
   { href: "/admin", label: "Settings", icon: <AdminIcon />, adminOnly: true },
 ];
 
+const ROLE_DISPLAY_LABELS: Record<string, string> = {
+  viewer: "User",
+  sales: "Sales",
+  admin: "Admin",
+};
+
 interface SidebarProps {
   userRole: string;
   userName: string;
+  canAccessSettings: boolean;
 }
 
-export function Sidebar({ userRole, userName }: SidebarProps) {
+export function Sidebar({ userRole, userName, canAccessSettings }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
   const visibleItems = navItems.filter(
-    (item) => !item.adminOnly || userRole === "admin"
+    (item) => !item.adminOnly || canAccessSettings
   );
 
   return (
@@ -145,7 +152,7 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
-              <p className="text-xs text-gray-400 capitalize">{userRole}</p>
+              <p className="text-xs text-gray-400">{ROLE_DISPLAY_LABELS[userRole] ?? userRole}</p>
             </div>
           )}
         </div>

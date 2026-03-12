@@ -18,7 +18,7 @@ interface User {
   user_locations: { location: Location }[];
 }
 
-const ROLE_LABELS: Record<string, string> = { viewer: "Viewer", sales: "Sales", admin: "Admin" };
+const ROLE_LABELS: Record<string, string> = { viewer: "User", sales: "Sales", admin: "Admin" };
 const ROLE_COLORS: Record<string, string> = {
   viewer: "bg-gray-100 text-gray-700",
   sales: "bg-blue-100 text-blue-700",
@@ -112,7 +112,7 @@ function UserForm({
             onChange={(e) => setRole(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            <option value="viewer">Viewer</option>
+            <option value="viewer">User</option>
             <option value="sales">Sales</option>
             <option value="admin">Admin</option>
           </select>

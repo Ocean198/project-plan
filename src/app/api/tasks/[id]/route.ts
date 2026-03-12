@@ -6,6 +6,7 @@ import {
 } from "@/lib/api-helpers";
 import { logTaskCompleted, logTaskPriorityChanged } from "@/lib/activity-logger";
 import { triggerWebhooks } from "@/lib/webhook";
+import { getPermissions, can } from "@/lib/permissions";
 
 // GET /api/tasks/[id]
 export async function GET(
@@ -42,7 +43,9 @@ export async function PATCH(
 ) {
   const session = await getSession();
   if (!session) return unauthorized();
-  if (!hasRole(session, "sales", "admin")) return forbidden();
+  const permissions = await getPermissions();
+  const role = session.user.role;
+  if (!can(role, 'board.change_status', permissions)) return forbidden();
 
   const { id } = await params;
   const taskId = parseInt(id);
@@ -62,8 +65,8 @@ export async function PATCH(
     if (!task) return notFound("Aufgabe nicht gefunden.");
 
     if (task.status === "completed") {
-      // Admins can reactivate a completed task by setting it back to open or in_progress
-      if (hasRole(session, "admin") && body.status && body.status !== "completed") {
+      // Users with reopen permission can reactivate a completed task by setting it back to open or in_progress
+      if (can(role, 'board.reopen_tasks', permissions) && body.status && body.status !== "completed") {
         const updated = await prisma.task.update({
           where: { id: taskId },
           data: { status: body.status, completed_at: null },
@@ -150,7 +153,8 @@ export async function DELETE(
 ) {
   const session = await getSession();
   if (!session) return unauthorized();
-  if (!hasRole(session, "admin")) return forbidden();
+  const permissions = await getPermissions();
+  if (!can(session.user.role, 'board.delete_tasks', permissions)) return forbidden();
 
   const { id } = await params;
   const taskId = parseInt(id);

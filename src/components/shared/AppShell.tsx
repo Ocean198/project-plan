@@ -9,12 +9,13 @@ interface AppShellProps {
   userRole: string;
   userName: string;
   userLocale: string;
+  canAccessSettings: boolean;
 }
 
-export function AppShell({ children, userRole, userName, userLocale }: AppShellProps) {
+export function AppShell({ children, userRole, userName, userLocale, canAccessSettings }: AppShellProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-[#FAFBFC]">
-      <Sidebar userRole={userRole} userName={userName} />
+      <Sidebar userRole={userRole} userName={userName} canAccessSettings={canAccessSettings} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header userName={userName} userRole={userRole} userLocale={userLocale} />
         <main className="flex-1 overflow-auto">

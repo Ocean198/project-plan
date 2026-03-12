@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession, hasRole, unauthorized, forbidden, notFound, serverError } from "@/lib/api-helpers";
+import { getSession, unauthorized, forbidden, notFound, serverError } from "@/lib/api-helpers";
+import { getPermissions, can } from "@/lib/permissions";
 
 // POST /api/sprints/[id]/archive
 export async function POST(
@@ -9,7 +10,8 @@ export async function POST(
 ) {
   const session = await getSession();
   if (!session) return unauthorized();
-  if (!hasRole(session, "admin")) return forbidden();
+  const permissions = await getPermissions();
+  if (!can(session.user.role, 'sprints.archive', permissions)) return forbidden();
 
   const { id } = await params;
   const sprintId = parseInt(id);
