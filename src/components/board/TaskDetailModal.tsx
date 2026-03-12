@@ -95,7 +95,7 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action_points: newSP }),
       });
-      if (res.ok) setCurrentActionPoints(newSP);
+      if (res.ok) setCurrentActionPoints(newSP as 1 | 2 | 3);
     } finally {
       setSavingSP(false);
     }
