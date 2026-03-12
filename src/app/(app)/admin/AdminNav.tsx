@@ -10,6 +10,7 @@ const TABS = [
   { href: "/admin/webhooks", label: "Webhooks" },
   { href: "/admin/board", label: "Board" },
   { href: "/admin/permissions", label: "Berechtigungen" },
+  { href: "/admin/import", label: "Import" },
 ];
 
 export function AdminNav() {
