@@ -41,12 +41,12 @@ export function VelocityChart({ data, locationColors }: VelocityChartProps) {
             tick={{ fontSize: 11, fill: "#9ca3af" }}
             axisLine={false}
             tickLine={false}
-            label={{ value: "AP", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }}
+            label={{ value: "SP", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }}
           />
           <Tooltip
             contentStyle={{ borderRadius: 8, border: "1px solid #f0f0f0", fontSize: 12 }}
             formatter={(val, name) => [
-              `${val} AP (Ø ${averages[String(name)] ?? 0} AP)`,
+              `${val} SP (Ø ${averages[String(name)] ?? 0} SP)`,
               name,
             ]}
           />
@@ -76,7 +76,7 @@ export function VelocityChart({ data, locationColors }: VelocityChartProps) {
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: locationColors[loc] }} />
             <div className="min-w-0">
               <p className="text-xs text-gray-500 truncate">{loc}</p>
-              <p className="text-sm font-semibold text-gray-800">Ø {averages[loc]} AP</p>
+              <p className="text-sm font-semibold text-gray-800">Ø {averages[loc]} SP</p>
             </div>
           </div>
         ))}

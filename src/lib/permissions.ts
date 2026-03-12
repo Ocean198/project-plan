@@ -3,6 +3,7 @@ import { prisma } from './prisma';
 export const PERMISSION_DEFS = {
   'board.move_tasks':           { label: 'Tasks verschieben (Drag & Drop)', group: 'Board' },
   'board.change_status':        { label: 'Task-Status ändern',              group: 'Board' },
+  'board.edit_story_points':    { label: 'Story Points bearbeiten',         group: 'Board' },
   'board.delete_tasks':         { label: 'Task löschen',                    group: 'Board' },
   'board.reopen_tasks':         { label: 'Abgeschlossene Tasks wieder öffnen', group: 'Board' },
   'sprints.lock_unlock':        { label: 'Sprint sperren / entsperren',     group: 'Sprints' },
@@ -20,6 +21,7 @@ export type RolePermissions = Record<PermissionKey, string[]>;
 export const DEFAULT_PERMISSIONS: RolePermissions = {
   'board.move_tasks':           ['sales'],
   'board.change_status':        ['sales'],
+  'board.edit_story_points':    ['viewer'],
   'board.delete_tasks':         [],
   'board.reopen_tasks':         [],
   'sprints.lock_unlock':        [],

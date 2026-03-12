@@ -349,7 +349,7 @@ export function ListClient({ canExport }: { canExport: boolean }) {
                   onClick={() => toggleSort("action_points")}
                   className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer select-none hover:text-gray-700"
                 >
-                  AP <SortIcon active={sortKey === "action_points"} dir={sortDir} />
+                  SP <SortIcon active={sortKey === "action_points"} dir={sortDir} />
                 </th>
                 <th
                   onClick={() => toggleSort("priority")}

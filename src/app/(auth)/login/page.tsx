@@ -51,12 +51,12 @@ export default function LoginPage() {
             Standortbasiertes<br />Projektmanagement.
           </h1>
           <p className="text-blue-200 text-lg leading-relaxed">
-            Verwalte Action Points, plane Sprints und behalte den Überblick über alle Standorte – in Echtzeit.
+            Verwalte Story Points, plane Sprints und behalte den Überblick über alle Standorte – in Echtzeit.
           </p>
 
           <div className="mt-10 grid grid-cols-2 gap-4">
             {[
-              { label: "AP-Kapazität", desc: "Automatisches Overflow & Cascade" },
+              { label: "SP-Kapazität", desc: "Automatisches Overflow & Cascade" },
               { label: "Kanban-Board", desc: "Drag & Drop mit Sprint-Blöcken" },
               { label: "Velocity-Tracking", desc: "Recharts-Diagramme pro Standort" },
               { label: "Webhooks", desc: "HMAC-signierte Echtzeit-Events" },

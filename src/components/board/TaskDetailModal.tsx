@@ -48,10 +48,13 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
   const [currentStatus, setCurrentStatus] = useState(task.status);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [currentActionPoints, setCurrentActionPoints] = useState(task.action_points);
+  const [savingSP, setSavingSP] = useState(false);
 
   const isCompleted = currentStatus === "completed";
-  const canEdit = can(userRole, 'board.change_status', permissions) && !isCompleted;
   const isHardLocked = task.sprint.lock_status === "hard_locked";
+  const canEdit = can(userRole, 'board.change_status', permissions) && !isCompleted;
+  const canEditSP = can(userRole, 'board.edit_story_points', permissions) && !isCompleted && !isHardLocked;
 
   useEffect(() => {
     async function loadActivities() {
@@ -80,6 +83,21 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
       setCurrentStatus(status);
     } finally {
       setChangingStatus(false);
+    }
+  }
+
+  async function handleSPChange(newSP: number) {
+    if (!canEditSP || savingSP) return;
+    setSavingSP(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action_points: newSP }),
+      });
+      if (res.ok) setCurrentActionPoints(newSP);
+    } finally {
+      setSavingSP(false);
     }
   }
 
@@ -146,9 +164,28 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
         <div className="px-6 pb-6 space-y-5">
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-xs font-bold px-2 py-1 rounded ${AP_COLORS[task.action_points]}`}>
-              {task.action_points} Action {task.action_points === 1 ? "Point" : "Points"}
-            </span>
+            {canEditSP ? (
+              <div className="flex items-center gap-1">
+                {[1, 2, 3].map((sp) => (
+                  <button
+                    key={sp}
+                    onClick={() => handleSPChange(sp)}
+                    disabled={savingSP}
+                    className={`text-xs font-bold px-2 py-1 rounded transition border ${
+                      currentActionPoints === sp
+                        ? AP_COLORS[sp] + " border-transparent"
+                        : "border-gray-200 text-gray-400 hover:border-gray-300 bg-white"
+                    } disabled:opacity-50`}
+                  >
+                    {sp} SP
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span className={`text-xs font-bold px-2 py-1 rounded ${AP_COLORS[currentActionPoints]}`}>
+                {currentActionPoints} Story {currentActionPoints === 1 ? "Point" : "Points"}
+              </span>
+            )}
             <span className={`text-xs font-medium px-2 py-1 rounded ${STATUS_CONFIG[currentStatus]?.classes}`}>
               {STATUS_CONFIG[currentStatus]?.label}
             </span>

@@ -73,7 +73,7 @@ export function ArchiveView() {
               {sprint.capacities.map((cap) => (
                 <span key={cap.location_id} className="flex items-center gap-1.5 text-xs text-gray-400">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cap.location_color }} />
-                  {cap.location_name}: {cap.used_action_points}/{cap.max_action_points} AP
+                  {cap.location_name}: {cap.used_action_points}/{cap.max_action_points} SP
                 </span>
               ))}
             </div>

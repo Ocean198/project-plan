@@ -75,7 +75,7 @@ export function DashboardClient({ canExport }: DashboardClientProps) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Übersicht über AP-Auslastung und Velocity</p>
+          <p className="text-sm text-gray-400 mt-0.5">Übersicht über SP-Auslastung und Velocity</p>
         </div>
         {canExport && (
           <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function DashboardClient({ canExport }: DashboardClientProps) {
 
       {/* Kapazitäts-Übersicht (Balkendiagramme) */}
       <div className="bg-white rounded-xl border border-gray-100 p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">AP-Auslastung – Nächste 6 Sprints</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">SP-Auslastung – Nächste 6 Sprints</h2>
         <p className="text-xs text-gray-400 mb-5">Orangene Linie = 90%-Warnschwelle</p>
         {loading ? (
           <Skeleton className="h-64" />
@@ -146,7 +146,7 @@ export function DashboardClient({ canExport }: DashboardClientProps) {
 
       {/* Velocity-Tracking */}
       <div className="bg-white rounded-xl border border-gray-100 p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">Velocity – Abgeschlossene AP pro Monat</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-1">Velocity – Abgeschlossene SP pro Monat</h2>
         <p className="text-xs text-gray-400 mb-5">Letzte 12 Monate, Durchschnitt der letzten 6 Monate</p>
         {loading ? (
           <Skeleton className="h-72" />

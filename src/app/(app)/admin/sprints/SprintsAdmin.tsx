@@ -127,7 +127,7 @@ function APBudgetRow({
           max={999}
           className="w-20 px-2 py-1 text-sm text-center border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <span className="text-xs text-gray-400">AP</span>
+        <span className="text-xs text-gray-400">SP</span>
         <button
           onClick={handleSave}
           disabled={saving || parseInt(value) === cap.max_action_points}
@@ -312,7 +312,7 @@ export function SprintsAdmin() {
                 onClick={() => setExpandedId(expandedId === sprint.id ? null : sprint.id)}
                 className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
               >
-                AP-Budget {expandedId === sprint.id ? "▲" : "▼"}
+                SP-Budget {expandedId === sprint.id ? "▲" : "▼"}
               </button>
               <button
                 onClick={() => setDeleteConfirm(sprint)}
@@ -328,7 +328,7 @@ export function SprintsAdmin() {
           </div>
           {expandedId === sprint.id && sprint.capacities.length > 0 && (
             <div className="border-t border-gray-50 px-5 py-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">AP-Budgets</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">SP-Budgets</p>
               <div className="divide-y divide-gray-50">
                 {sprint.capacities.map((cap) => (
                   <APBudgetRow key={cap.location_id} cap={cap} sprintId={sprint.id} onUpdate={load} />

@@ -45,7 +45,9 @@ export async function PATCH(
   if (!session) return unauthorized();
   const permissions = await getPermissions();
   const role = session.user.role;
-  if (!can(role, 'board.change_status', permissions)) return forbidden();
+  const canChangeStatus = can(role, 'board.change_status', permissions);
+  const canEditSP = can(role, 'board.edit_story_points', permissions);
+  if (!canChangeStatus && !canEditSP) return forbidden();
 
   const { id } = await params;
   const taskId = parseInt(id);
@@ -90,7 +92,8 @@ export async function PATCH(
     if (body.title !== undefined) updateData.title = body.title.trim();
     if (body.description !== undefined) updateData.description = body.description.trim() || null;
     if (body.action_points !== undefined) {
-      if (![1, 2, 3].includes(body.action_points)) return badRequest("Action Points müssen 1, 2 oder 3 sein.");
+      if (!canEditSP) return forbidden("Keine Berechtigung für Story Points.");
+      if (![1, 2, 3].includes(body.action_points)) return badRequest("Story Points müssen 1, 2 oder 3 sein.");
       updateData.action_points = body.action_points;
     }
     if (body.priority !== undefined) {

@@ -5,9 +5,9 @@ import { CSS } from "@dnd-kit/utilities";
 import type { BoardTask } from "@/types/board";
 
 const AP_COLORS: Record<number, { bg: string; text: string; label: string }> = {
-  1: { bg: "bg-green-100", text: "text-green-700", label: "1 AP" },
-  2: { bg: "bg-yellow-100", text: "text-yellow-700", label: "2 AP" },
-  3: { bg: "bg-red-100", text: "text-red-700", label: "3 AP" },
+  1: { bg: "bg-green-100", text: "text-green-700", label: "1 SP" },
+  2: { bg: "bg-yellow-100", text: "text-yellow-700", label: "2 SP" },
+  3: { bg: "bg-red-100", text: "text-red-700", label: "3 SP" },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {

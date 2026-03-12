@@ -103,7 +103,7 @@ export function CascadeConfirmDialog({
                           )}
                           <span className="truncate">{t.title}</span>
                         </div>
-                        <span className="shrink-0 ml-2 font-semibold">{t.action_points} AP</span>
+                        <span className="shrink-0 ml-2 font-semibold">{t.action_points} SP</span>
                       </div>
                     ))}
                   </div>

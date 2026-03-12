@@ -28,7 +28,7 @@ const ACTION_LABELS: Record<string, string> = {
   sprint_locked: "Sprint gesperrt",
   sprint_unlocked: "Sprint entsperrt",
   sprint_created: "Sprint erstellt",
-  capacity_changed: "AP-Budget geändert",
+  capacity_changed: "SP-Budget geändert",
   task_imported: "Aufgabe importiert",
   location_created: "Standort erstellt",
   user_created: "User erstellt",
@@ -55,13 +55,13 @@ function formatDetails(action: string, details: Record<string, unknown> | null):
     case "task_moved":
       return `Von „${details.from_sprint_label}" → „${details.to_sprint_label}"`;
     case "task_created":
-      return `${details.action_points ?? ""} AP`;
+      return `${details.action_points ?? ""} SP`;
     case "cascade_triggered": {
       const tasks = details.cascaded_tasks as { to_sprint_id: number }[] | undefined;
       return tasks ? `${tasks.length} Aufgabe${tasks.length !== 1 ? "n" : ""} weiterverschoben` : "";
     }
     case "capacity_changed":
-      return `${details.old_value} AP → ${details.new_value} AP`;
+      return `${details.old_value} SP → ${details.new_value} SP`;
     case "task_priority_changed":
       return `Prio ${details.old_priority} → ${details.new_priority}`;
     case "sprint_locked":

@@ -99,7 +99,7 @@ function LocationForm({
         <ColorPicker value={color} onChange={setColor} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Standard-AP-Budget (optional)</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Standard-SP-Budget (optional)</label>
         <input
           type="number"
           value={ap}
@@ -109,7 +109,7 @@ function LocationForm({
           className="w-32 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="50"
         />
-        <p className="text-xs text-gray-400 mt-1">Leer lassen = Wert aus DEFAULT_AP_BUDGET (.env)</p>
+        <p className="text-xs text-gray-400 mt-1">Leer lassen = Wert aus DEFAULT_SP_BUDGET (.env)</p>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex items-center gap-2 pt-1">
@@ -236,7 +236,7 @@ export function LocationsAdmin() {
                         )}
                       </div>
                       <span className="text-xs text-gray-400">
-                        {loc.default_action_points ? `${loc.default_action_points} AP Standard` : "AP aus .env"}
+                        {loc.default_action_points ? `${loc.default_action_points} SP Standard` : "SP aus .env"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

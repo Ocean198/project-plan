@@ -40,7 +40,7 @@ export function WelcomeScreen({ userName }: { userName: string }) {
         </svg>
       ),
       title: "Dashboard",
-      desc: "Behalte die AP-Auslastung aller Standorte im Blick und verfolge die Velocity über die letzten Monate.",
+      desc: "Behalte die SP-Auslastung aller Standorte im Blick und verfolge die Velocity über die letzten Monate.",
     },
     {
       icon: (
@@ -71,7 +71,7 @@ export function WelcomeScreen({ userName }: { userName: string }) {
         </div>
 
         <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-          ressourcify hilft dir dabei, Action Points standortübergreifend zu planen und Sprints effizient zu verwalten. Hier ist ein kurzer Überblick:
+          ressourcify hilft dir dabei, Story Points standortübergreifend zu planen und Sprints effizient zu verwalten. Hier ist ein kurzer Überblick:
         </p>
 
         <div className="space-y-4 mb-8">
