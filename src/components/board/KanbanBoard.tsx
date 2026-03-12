@@ -321,6 +321,17 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
     }
   }
 
+  async function handleDeleteTask(taskId: number) {
+    const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
+    if (res.ok) {
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      setSelectedTask(null);
+      showToast("Aufgabe gelöscht.");
+    } else {
+      showToast("Aufgabe konnte nicht gelöscht werden.", "error");
+    }
+  }
+
   async function handleStatusChange(taskId: number, status: "open" | "in_progress" | "completed") {
     const res = await fetch(`/api/tasks/${taskId}`, {
       method: "PATCH",
@@ -524,6 +535,7 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
           userRole={userRole}
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleStatusChange}
+          onDelete={userRole === "admin" ? handleDeleteTask : undefined}
         />
       )}
 

@@ -36,13 +36,16 @@ interface TaskDetailModalProps {
   userRole: string;
   onClose: () => void;
   onStatusChange: (taskId: number, status: "open" | "in_progress" | "completed") => Promise<void>;
+  onDelete?: (taskId: number) => Promise<void>;
 }
 
-export function TaskDetailModal({ task, userRole, onClose, onStatusChange }: TaskDetailModalProps) {
+export function TaskDetailModal({ task, userRole, onClose, onStatusChange, onDelete }: TaskDetailModalProps) {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [changingStatus, setChangingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(task.status);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const isCompleted = currentStatus === "completed";
   const canEdit = (userRole === "sales" || userRole === "admin") && !isCompleted;
@@ -75,6 +78,17 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange }: Tas
       setCurrentStatus(status);
     } finally {
       setChangingStatus(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!onDelete || deleting) return;
+    setDeleting(true);
+    try {
+      await onDelete(task.id);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirm(false);
     }
   }
 
@@ -190,30 +204,69 @@ export function TaskDetailModal({ task, userRole, onClose, onStatusChange }: Tas
             </div>
           )}
 
-          {/* Admin: abgeschlossene Aufgabe wieder öffnen */}
-          {isCompleted && userRole === "admin" && (
+          {/* Admin-Aktionen */}
+          {userRole === "admin" && (
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Admin-Aktion</p>
-              <button
-                onClick={async () => {
-                  if (changingStatus) return;
-                  setChangingStatus(true);
-                  try {
-                    await onStatusChange(task.id, "open");
-                    setCurrentStatus("open");
-                  } finally {
-                    setChangingStatus(false);
-                  }
-                }}
-                disabled={changingStatus}
-                className="w-full py-2 rounded-lg text-xs font-medium border border-amber-200 text-amber-700 hover:bg-amber-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Aufgabe wieder öffnen
-              </button>
+              <div className="flex flex-col gap-2">
+                {/* Abgeschlossene Aufgabe wieder öffnen */}
+                {isCompleted && (
+                  <button
+                    onClick={async () => {
+                      if (changingStatus) return;
+                      setChangingStatus(true);
+                      try {
+                        await onStatusChange(task.id, "open");
+                        setCurrentStatus("open");
+                      } finally {
+                        setChangingStatus(false);
+                      }
+                    }}
+                    disabled={changingStatus}
+                    className="w-full py-2 rounded-lg text-xs font-medium border border-amber-200 text-amber-700 hover:bg-amber-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Aufgabe wieder öffnen
+                  </button>
+                )}
+
+                {/* Aufgabe löschen */}
+                {!deleteConfirm ? (
+                  <button
+                    onClick={() => setDeleteConfirm(true)}
+                    className="w-full py-2 rounded-lg text-xs font-medium border border-red-200 text-red-600 hover:bg-red-50 transition flex items-center justify-center gap-1.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Aufgabe löschen
+                  </button>
+                ) : (
+                  <div className="border border-red-200 rounded-lg p-3 bg-red-50">
+                    <p className="text-xs text-red-700 font-medium mb-2">Wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="flex-1 py-1.5 rounded text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50"
+                      >
+                        {deleting ? "Löschen..." : "Ja, löschen"}
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(false)}
+                        disabled={deleting}
+                        className="flex-1 py-1.5 rounded text-xs font-medium border border-red-200 text-red-600 hover:bg-white transition"
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

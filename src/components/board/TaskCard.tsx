@@ -32,7 +32,7 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
     isDragging,
   } = useSortable({
     id: `task-${task.id}`,
-    disabled: isDraggingDisabled || task.status === "completed",
+    disabled: isDraggingDisabled || task.status === "completed" || task.status === "in_progress",
   });
 
   const style = {
@@ -43,6 +43,8 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
   const ap = AP_COLORS[task.action_points] ?? AP_COLORS[1];
   const statusCfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.open;
   const isCompleted = task.status === "completed";
+  const isInProgress = task.status === "in_progress";
+  const isLocked = isCompleted || isInProgress;
 
   return (
     <div
@@ -55,12 +57,14 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
           ? "opacity-30 shadow-none border border-gray-100"
           : isCompleted
             ? "opacity-55 border border-gray-100"
-            : "border border-gray-100 hover:-translate-y-0.5 hover:shadow-md cursor-grab active:cursor-grabbing"
+            : isInProgress
+              ? "border border-blue-100"
+              : "border border-gray-100 hover:-translate-y-0.5 hover:shadow-md cursor-grab active:cursor-grabbing"
         }
       `}
       onClick={() => onClick(task)}
       {...attributes}
-      {...(isDraggingDisabled || isCompleted ? {} : listeners)}
+      {...(isDraggingDisabled || isLocked ? {} : listeners)}
     >
       {/* Standort-Farbstreifen links */}
       <div
