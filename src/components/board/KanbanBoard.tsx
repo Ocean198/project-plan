@@ -135,7 +135,19 @@ export function KanbanBoard({ userRole }: KanbanBoardProps) {
       const overTask = tasks.find((t) => t.id === overTaskId);
       if (!overTask) return;
       targetSprintId = overTask.sprint.id;
-      insertBeforeTaskId = overTaskId;
+      if (overTask.status === "in_progress" || overTask.status === "completed") {
+        // Hinter dem gesperrten Task einordnen: nächsten freien Task suchen
+        const sprintTasks = tasks
+          .filter((t) => t.sprint.id === overTask.sprint.id)
+          .sort((a, b) => a.priority - b.priority);
+        const overIdx = sprintTasks.findIndex((t) => t.id === overTaskId);
+        const nextFree = sprintTasks.slice(overIdx + 1).find(
+          (t) => t.status !== "in_progress" && t.status !== "completed"
+        );
+        insertBeforeTaskId = nextFree?.id; // undefined = ans Ende
+      } else {
+        insertBeforeTaskId = overTaskId;
+      }
     } else {
       return;
     }
