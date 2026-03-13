@@ -18,24 +18,25 @@ interface ImportResult {
   error?: string;
 }
 
-const TEMPLATE_CSV = `title,description,story_points,location_name,external_ticket_id
-"Login-Bug beheben","Fehler beim SSO-Login",2,Berlin,JIRA-101
-"Dashboard-Redesign",,5,München,
-"API-Dokumentation","Swagger aktualisieren",1,Hamburg,JIRA-103`;
+const TEMPLATE_HEADERS = ["title", "description", "story_points", "location_name", "external_ticket_id"];
+const TEMPLATE_ROWS = [
+  ["Login-Bug beheben", "Fehler beim SSO-Login", "2", "Berlin", "JIRA-101"],
+  ["Dashboard-Redesign, neue Ansicht", "", "5", "München", ""],
+  ["API-Dokumentation", "Swagger aktualisieren", "1", "Hamburg", "JIRA-103"],
+];
+const TEMPLATE_TSV = [TEMPLATE_HEADERS, ...TEMPLATE_ROWS].map((r) => r.join("\t")).join("\n");
 
-
-function parseCsv(text: string): ParsedRow[] {
+function parseTsv(text: string): ParsedRow[] {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
 
-  // Parse header (case-insensitive)
-  const header = parseCsvLine(lines[0]).map((h) => h.toLowerCase().trim());
+  const header = lines[0].split("\t").map((h) => h.toLowerCase().trim());
 
   const rows: ParsedRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    const values = parseCsvLine(line);
+    const line = lines[i];
+    if (!line.trim()) continue;
+    const values = line.split("\t");
     const obj: Record<string, string> = {};
     header.forEach((col, idx) => {
       obj[col] = values[idx]?.trim() ?? "";
@@ -51,37 +52,12 @@ function parseCsv(text: string): ParsedRow[] {
   return rows;
 }
 
-function parseCsvLine(line: string): string[] {
-  const result: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === "," && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else {
-      current += ch;
-    }
-  }
-  result.push(current);
-  return result;
-}
-
 function downloadTemplate() {
-  const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob([TEMPLATE_TSV], { type: "text/tab-separated-values;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "import-vorlage.csv";
+  a.download = "import-vorlage.tsv";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -104,7 +80,7 @@ export function ImportAdmin() {
     reader.onload = (ev) => {
       try {
         const text = ev.target?.result as string;
-        const parsed = parseCsv(text);
+        const parsed = parseTsv(text);
         if (parsed.length === 0) {
           setParseError("Keine Datenzeilen gefunden. Prüfe das Format.");
           setRows([]);
@@ -158,7 +134,7 @@ export function ImportAdmin() {
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-blue-800 mb-1">CSV-Format</p>
+            <p className="text-sm font-semibold text-blue-800 mb-1">TSV-Format (Tab-getrennt)</p>
             <p className="text-xs text-blue-700 leading-relaxed">
               Pflichtfelder: <code className="bg-blue-100 px-1 rounded">title</code>,{" "}
               <code className="bg-blue-100 px-1 rounded">location_name</code>
@@ -167,6 +143,7 @@ export function ImportAdmin() {
               <code className="bg-blue-100 px-1 rounded">story_points</code> (1–10, Standard: 1),{" "}
               <code className="bg-blue-100 px-1 rounded">external_ticket_id</code>
               <br />
+              Felder werden durch <strong>Tabs</strong> getrennt – Kommas und Sonderzeichen im Text sind kein Problem.
               Standortname muss exakt dem Namen in den Einstellungen entsprechen.
             </p>
           </div>
@@ -203,7 +180,7 @@ export function ImportAdmin() {
           <input
             ref={fileRef}
             type="file"
-            accept=".csv,text/csv"
+            accept=".tsv,.txt,text/tab-separated-values,text/plain"
             onChange={handleFile}
             className="hidden"
           />
@@ -211,8 +188,8 @@ export function ImportAdmin() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
-          <p className="text-sm font-medium text-gray-600">CSV-Datei hochladen</p>
-          <p className="text-xs text-gray-400 mt-1">Klicken oder Datei hineinziehen</p>
+          <p className="text-sm font-medium text-gray-600">TSV-Datei hochladen</p>
+          <p className="text-xs text-gray-400 mt-1">Klicken oder Datei hineinziehen (.tsv / .txt)</p>
           {parseError && <p className="text-xs text-red-600 mt-3 font-medium">{parseError}</p>}
         </div>
       )}
