@@ -8,7 +8,7 @@ export default auth((req) => {
   // Public routes
   const isPublicRoute =
     nextUrl.pathname.startsWith("/login") ||
-    nextUrl.pathname.startsWith("/api/tasks/import");
+    nextUrl.pathname === "/api/tasks/import";
 
   if (!isLoggedIn && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", nextUrl));
