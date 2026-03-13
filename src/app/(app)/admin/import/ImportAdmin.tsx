@@ -26,21 +26,59 @@ const TEMPLATE_ROWS = [
 ];
 const TEMPLATE_TSV = [TEMPLATE_HEADERS, ...TEMPLATE_ROWS].map((r) => r.join("\t")).join("\n");
 
+/** Parst TSV mit Tab-Trenner, unterstützt in Anführungszeichen eingeschlossene
+ *  Felder die Zeilenumbrüche und Tabs enthalten können (Excel-Export). */
+function parseTsvRaw(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < text.length) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') {
+        field += '"'; i += 2;
+      } else if (ch === '"') {
+        inQuotes = false; i++;
+      } else {
+        field += ch; i++;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true; i++;
+      } else if (ch === '\t') {
+        row.push(field); field = ""; i++;
+      } else if (ch === '\n') {
+        row.push(field); field = "";
+        if (row.some((f) => f.trim())) rows.push(row);
+        row = []; i++;
+      } else if (ch === '\r') {
+        i++;
+      } else {
+        field += ch; i++;
+      }
+    }
+  }
+  // letzte Zeile
+  row.push(field);
+  if (row.some((f) => f.trim())) rows.push(row);
+
+  return rows;
+}
+
 function parseTsv(text: string): ParsedRow[] {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
+  const raw = parseTsvRaw(text);
+  if (raw.length < 2) return [];
 
-  const header = lines[0].split("\t").map((h) => h.toLowerCase().trim());
-
+  const header = raw[0].map((h) => h.toLowerCase().trim());
   const rows: ParsedRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line.trim()) continue;
-    const values = line.split("\t");
+
+  for (let i = 1; i < raw.length; i++) {
+    const values = raw[i];
     const obj: Record<string, string> = {};
-    header.forEach((col, idx) => {
-      obj[col] = values[idx]?.trim() ?? "";
-    });
+    header.forEach((col, idx) => { obj[col] = values[idx]?.trim() ?? ""; });
     rows.push({
       title: obj["title"] ?? "",
       description: obj["description"] ?? "",
