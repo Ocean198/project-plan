@@ -23,7 +23,6 @@ const TEMPLATE_CSV = `title,description,story_points,location_name,external_tick
 "Dashboard-Redesign",,5,München,
 "API-Dokumentation","Swagger aktualisieren",1,Hamburg,JIRA-103`;
 
-const COLUMNS = ["title", "description", "story_points", "location_name", "external_ticket_id"];
 
 function parseCsv(text: string): ParsedRow[] {
   const lines = text.trim().split(/\r?\n/);
@@ -92,6 +91,7 @@ export function ImportAdmin() {
   const [results, setResults] = useState<ImportResult[] | null>(null);
   const [importing, setImporting] = useState(false);
   const [parseError, setParseError] = useState("");
+  const [apiError, setApiError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -121,6 +121,7 @@ export function ImportAdmin() {
   async function handleImport() {
     if (rows.length === 0 || importing) return;
     setImporting(true);
+    setApiError("");
     setResults(null);
     try {
       const res = await fetch("/api/tasks/import/csv", {
@@ -129,7 +130,13 @@ export function ImportAdmin() {
         body: JSON.stringify(rows),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setApiError(data.error ?? `Fehler ${res.status}`);
+        return;
+      }
       setResults(data.results ?? []);
+    } catch {
+      setApiError("Netzwerkfehler – Import konnte nicht gesendet werden.");
     } finally {
       setImporting(false);
     }
@@ -260,6 +267,10 @@ export function ImportAdmin() {
               </table>
             </div>
           </div>
+
+          {apiError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{apiError}</p>
+          )}
 
           <div className="flex gap-2">
             <button
