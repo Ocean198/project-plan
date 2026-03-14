@@ -303,11 +303,19 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
         return;
       }
 
+      // Cascaded Tasks vom Server ermitteln — deren Prioritäten nicht überschreiben
+      const moveResult = await res.json();
+      const cascadedIds = new Set<number>(
+        (moveResult.cascaded_tasks ?? []).map((t: { id: number }) => t.id)
+      );
+
       // Vollständiger Reorder: alle betroffenen Tasks in richtiger Reihenfolge patchen
       // (robuster als Priority-Offset, funktioniert auch bei verdichteten Prioritäten)
-      if (priorityUpdates.length > 0) {
+      // Cascaded Tasks ausschließen — der Server hat ihre Position bereits korrekt gesetzt
+      const filteredUpdates = priorityUpdates.filter(({ id }) => !cascadedIds.has(id));
+      if (filteredUpdates.length > 0) {
         await Promise.all(
-          priorityUpdates.map(({ id, priority }) =>
+          filteredUpdates.map(({ id, priority }) =>
             fetch(`/api/tasks/${id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
