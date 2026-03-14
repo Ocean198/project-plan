@@ -78,10 +78,26 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
     return Array.from(map.values());
   }, [sprints]);
 
+  // used_action_points live aus dem Task-State berechnen (immer synchron mit Optimistic-Updates)
+  const sprintsWithLiveCapacity = useMemo(() => {
+    const usedBySprintLoc = new Map<string, number>();
+    tasks.forEach((task) => {
+      const key = `${task.sprint.id}:${task.location.id}`;
+      usedBySprintLoc.set(key, (usedBySprintLoc.get(key) ?? 0) + task.action_points);
+    });
+    return sprints.map((sprint) => ({
+      ...sprint,
+      capacities: sprint.capacities.map((cap) => ({
+        ...cap,
+        used_action_points: usedBySprintLoc.get(`${sprint.id}:${cap.location_id}`) ?? 0,
+      })),
+    }));
+  }, [sprints, tasks]);
+
   // Gefilterte Tasks pro Sprint
   const filteredTasksBySprint = useMemo(() => {
     const result = new Map<number, BoardTask[]>();
-    sprints.forEach((s) => result.set(s.id, []));
+    sprintsWithLiveCapacity.forEach((s) => result.set(s.id, []));
 
     tasks.forEach((task) => {
       if (filters.locationIds.length > 0 && !filters.locationIds.includes(task.location.id)) return;
@@ -93,7 +109,7 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
     // Nach Priorität sortieren
     result.forEach((list) => list.sort((a, b) => a.priority - b.priority));
     return result;
-  }, [tasks, sprints, filters]);
+  }, [tasks, sprintsWithLiveCapacity, filters]);
 
   function showToast(message: string, type: "success" | "error" = "success", undoAction?: () => void) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -487,7 +503,7 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
       >
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-5 p-6 min-w-max pb-8">
-            {sprints.map((sprint) => (
+            {sprintsWithLiveCapacity.map((sprint) => (
               <SprintColumn
                 key={sprint.id}
                 sprint={sprint}
