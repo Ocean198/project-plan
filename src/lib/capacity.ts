@@ -9,7 +9,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { ensureMinimumFutureSprints, createSprint } from "@/lib/sprint-manager";
-import type { Sprint, Task } from "@prisma/client";
+import type { Sprint } from "@prisma/client";
 
 // ─── AP-Verbrauch ────────────────────────────────────────────────────────────
 
@@ -304,6 +304,22 @@ export async function executeCascade(
 
     // AP aus altem Sprint entfernen (in-memory für Transaktion)
     const usedMap = new Map<string, number>();
+    // Tracks next prepend-priority per sprint/location (evicted tasks go to top)
+    const prependPriorityMap = new Map<string, number>();
+
+    const consumePrependPriority = async (sprintId: number, locationId: number): Promise<number> => {
+      const key = `${sprintId}:${locationId}`;
+      if (!prependPriorityMap.has(key)) {
+        const result = await tx.task.aggregate({
+          where: { sprint_id: sprintId, location_id: locationId },
+          _min: { priority: true },
+        });
+        prependPriorityMap.set(key, (result._min.priority ?? 1) - 1);
+      }
+      const val = prependPriorityMap.get(key)!;
+      prependPriorityMap.set(key, val - 1);
+      return val;
+    };
 
     const getUsed = async (sprintId: number, locationId: number): Promise<number> => {
       const key = `${sprintId}:${locationId}`;
@@ -409,9 +425,10 @@ export async function executeCascade(
           newSprintsCreated++;
         }
 
+        const prependPriority = await consumePrependPriority(nextSprint.id, task.location_id);
         await tx.task.update({
           where: { id: t.id },
-          data: { sprint_id: nextSprint.id },
+          data: { sprint_id: nextSprint.id, priority: prependPriority },
         });
 
         modifyUsed(sprint.id, task.location_id, -t.action_points);
@@ -433,4 +450,133 @@ export async function executeCascade(
       new_sprints_created: newSprintsCreated,
     };
   });
+}
+
+// ─── Kapazitäts-Rebalancing ───────────────────────────────────────────────────
+
+export interface RebalanceResult {
+  pulled_task_ids: number[];
+  pushed_task_ids: number[];
+}
+
+/**
+ * Gleicht Tasks automatisch aus, wenn das SP-Budget eines Sprints geändert wird:
+ * - Erhöhung: zieht Tasks vom nächsten Sprint vor (von oben)
+ * - Verringerung: schiebt überzählige Tasks in den nächsten Sprint (nach oben dort)
+ */
+export async function rebalanceAfterCapacityChange(
+  sprintId: number,
+  locationId: number,
+  oldMax: number,
+  newMax: number
+): Promise<RebalanceResult> {
+  if (newMax === oldMax) return { pulled_task_ids: [], pushed_task_ids: [] };
+
+  const sprint = await prisma.sprint.findUnique({ where: { id: sprintId } });
+  if (!sprint || sprint.lock_status !== "open") return { pulled_task_ids: [], pushed_task_ids: [] };
+
+  const usedResult = await prisma.task.aggregate({
+    where: { sprint_id: sprintId, location_id: locationId },
+    _sum: { action_points: true },
+  });
+  const used = usedResult._sum.action_points ?? 0;
+
+  if (newMax > oldMax) {
+    // Kapazität erhöht → Tasks vom nächsten Sprint vorziehen
+    const freeCapacity = newMax - used;
+    if (freeCapacity <= 0) return { pulled_task_ids: [], pushed_task_ids: [] };
+
+    const nextSprint = await prisma.sprint.findFirst({
+      where: {
+        is_archived: false,
+        lock_status: { not: "hard_locked" },
+        OR: [
+          { year: { gt: sprint.year } },
+          { year: sprint.year, month: { gt: sprint.month } },
+        ],
+      },
+      orderBy: [{ year: "asc" }, { month: "asc" }],
+    });
+    if (!nextSprint) return { pulled_task_ids: [], pushed_task_ids: [] };
+
+    const candidates = await prisma.task.findMany({
+      where: { sprint_id: nextSprint.id, location_id: locationId, status: { not: "completed" } },
+      orderBy: { priority: "asc" },
+    });
+
+    const maxPriorityResult = await prisma.task.aggregate({
+      where: { sprint_id: sprintId, location_id: locationId },
+      _max: { priority: true },
+    });
+    let appendPriority = (maxPriorityResult._max.priority ?? 0) + 1;
+
+    let remaining = freeCapacity;
+    const pulled: number[] = [];
+    for (const task of candidates) {
+      if (task.action_points > remaining) break;
+      await prisma.task.update({
+        where: { id: task.id },
+        data: { sprint_id: sprintId, priority: appendPriority++ },
+      });
+      remaining -= task.action_points;
+      pulled.push(task.id);
+    }
+    return { pulled_task_ids: pulled, pushed_task_ids: [] };
+
+  } else {
+    // Kapazität verringert → überzählige Tasks in den nächsten Sprint schieben
+    const overflow = used - newMax;
+    if (overflow <= 0) return { pulled_task_ids: [], pushed_task_ids: [] };
+
+    let nextSprint = await prisma.sprint.findFirst({
+      where: {
+        is_archived: false,
+        OR: [
+          { year: { gt: sprint.year } },
+          { year: sprint.year, month: { gt: sprint.month } },
+        ],
+      },
+      orderBy: [{ year: "asc" }, { month: "asc" }],
+    });
+    if (!nextSprint) {
+      const nm = sprint.month === 12
+        ? { year: sprint.year + 1, month: 1 }
+        : { year: sprint.year, month: sprint.month + 1 };
+      nextSprint = await createSprint(nm.year, nm.month);
+    }
+
+    const toEvict = await prisma.task.findMany({
+      where: { sprint_id: sprintId, location_id: locationId, status: { not: "completed" } },
+      orderBy: { priority: "desc" }, // niedrigste Prio zuerst (höchste Zahl)
+    });
+
+    const minPriorityResult = await prisma.task.aggregate({
+      where: { sprint_id: nextSprint.id, location_id: locationId },
+      _min: { priority: true },
+    });
+
+    // Zu evictierende Tasks sammeln
+    const selected: typeof toEvict = [];
+    let remainingOverflow = overflow;
+    for (const task of toEvict) {
+      if (remainingOverflow <= 0) break;
+      selected.push(task);
+      remainingOverflow -= task.action_points;
+    }
+
+    // Umkehren: wichtigste der Evicted-Gruppe kommt ganz oben in den nächsten Sprint
+    selected.reverse();
+    const count = selected.length;
+    const startPriority = (minPriorityResult._min.priority ?? 1) - count;
+
+    const pushed: number[] = [];
+    for (let i = 0; i < selected.length; i++) {
+      await prisma.task.update({
+        where: { id: selected[i].id },
+        data: { sprint_id: nextSprint.id, priority: startPriority + i },
+      });
+      pushed.push(selected[i].id);
+    }
+    return { pulled_task_ids: [], pushed_task_ids: pushed };
+  }
 }

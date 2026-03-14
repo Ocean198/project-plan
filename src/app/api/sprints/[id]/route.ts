@@ -7,6 +7,7 @@ import {
 import { logCapacityChanged } from "@/lib/activity-logger";
 import { notifyCapacityChanged } from "@/lib/notification-service";
 import { createNextSprint } from "@/lib/sprint-manager";
+import { rebalanceAfterCapacityChange } from "@/lib/capacity";
 
 // GET /api/sprints/[id]
 export async function GET(
@@ -123,7 +124,14 @@ export async function PATCH(
       triggeredByUserName: session.user.name,
     });
 
-    return NextResponse.json(capacity);
+    const rebalance = await rebalanceAfterCapacityChange(
+      sprintId,
+      body.location_id,
+      oldValue,
+      body.max_action_points
+    );
+
+    return NextResponse.json({ ...capacity, rebalance });
   } catch {
     return serverError();
   }
