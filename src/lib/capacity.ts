@@ -345,15 +345,17 @@ export async function executeCascade(
       return capacity?.max_action_points ?? parseInt(process.env.DEFAULT_AP_BUDGET ?? "50");
     };
 
+    // Pre-initialize both sprint used-counts BEFORE the DB move so reads aren't inflated
+    await getUsed(task.sprint_id, task.location_id);
+    await getUsed(targetSprintId, task.location_id);
+
     // Task in Ziel-Sprint verschieben
     await tx.task.update({
       where: { id: taskId },
       data: { sprint_id: targetSprintId },
     });
 
-    await getUsed(task.sprint_id, task.location_id); // Initialisierung vor Modifikation
     modifyUsed(task.sprint_id, task.location_id, -task.action_points);
-    await getUsed(targetSprintId, task.location_id);
     modifyUsed(targetSprintId, task.location_id, task.action_points);
 
     const cascadedTasks: Array<{ id: number; from_sprint_id: number; to_sprint_id: number }> = [];
@@ -426,13 +428,14 @@ export async function executeCascade(
         }
 
         const prependPriority = await consumePrependPriority(nextSprint.id, task.location_id);
+        // Pre-initialize next sprint used-count BEFORE the DB move
+        await getUsed(nextSprint.id, task.location_id);
         await tx.task.update({
           where: { id: t.id },
           data: { sprint_id: nextSprint.id, priority: prependPriority },
         });
 
         modifyUsed(sprint.id, task.location_id, -t.action_points);
-        await getUsed(nextSprint.id, task.location_id);
         modifyUsed(nextSprint.id, task.location_id, t.action_points);
         remainingOverflow -= t.action_points;
 
