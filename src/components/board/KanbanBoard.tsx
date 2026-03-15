@@ -42,9 +42,17 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
   const [liveOverId, setLiveOverId] = useState<string | null>(null);
   const [debugDrop, setDebugDrop] = useState<{ overId: string; targetSprint: number; insertBefore?: number; action: string; draggedLoc?: number; overLoc?: number; oldIdx?: number } | null>(null);
   const [debugMode, setDebugMode] = useState(false);
+  const [debugEvents, setDebugEvents] = useState<string[]>([]);
   useEffect(() => {
     setDebugMode(localStorage.getItem("sb_debug_mode") === "true");
   }, []);
+
+  function dbg(msg: string) {
+    const ts = new Date().toISOString().slice(11, 23);
+    const line = `[${ts}] ${msg}`;
+    console.log("[DEBUG]", line);
+    setDebugEvents((prev) => [line, ...prev].slice(0, 30));
+  }
   const [filters, setFilters] = useState<ActiveFilters>({ locationIds: [], statuses: [] });
   const [selectedTask, setSelectedTask] = useState<BoardTask | null>(null);
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
@@ -258,6 +266,16 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
     const previousTasks = tasks;
     const movedTask = tasks.find((t) => t.id === taskId);
 
+    if (debugMode && movedTask) {
+      const fromSp = sprints.find((s) => s.id === movedTask.sprint.id);
+      const toSp = targetSprintInfo;
+      const fromCap = fromSp?.capacities.find((c) => c.location_id === movedTask.location.id);
+      const toCap = toSp?.capacities.find((c) => c.location_id === movedTask.location.id);
+      dbg(`MOVE START task#${taskId} (${movedTask.action_points}SP, loc#${movedTask.location.id})`);
+      dbg(`  FROM sprint#${movedTask.sprint.id} "${fromSp?.label}" server-cap: ${fromCap?.used_action_points ?? "?"}/${fromCap?.max_action_points ?? "?"}`);
+      dbg(`  TO   sprint#${targetSprintId} "${toSp?.label}" server-cap: ${toCap?.used_action_points ?? "?"}/${toCap?.max_action_points ?? "?"}`);
+    }
+
     // Gewünschte Reihenfolge im Ziel-Sprint/Standort berechnen
     // (basiert auf demselben Snapshot wie der Placeholder — konsistent & stabil)
     let priorityUpdates: { id: number; priority: number }[] = [];
@@ -315,12 +333,23 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
 
       if (!res.ok) {
         setTasks(previousTasks); // Rollback
+        if (debugMode) dbg(`MOVE FAILED status=${res.status}`);
         showToast("Verschiebung fehlgeschlagen.", "error");
         return;
       }
 
       // Cascaded Tasks vom Server ermitteln — deren Prioritäten nicht überschreiben
       const moveResult = await res.json();
+      if (debugMode) {
+        dbg(`SERVER RESPONSE: moved task#${moveResult.moved_task?.id} → sprint#${moveResult.moved_task?.sprint_id}`);
+        if (moveResult.cascaded_tasks?.length > 0) {
+          moveResult.cascaded_tasks.forEach((ct: { id: number; from_sprint_id: number; to_sprint_id: number }) =>
+            dbg(`  CASCADE task#${ct.id}: sprint#${ct.from_sprint_id} → sprint#${ct.to_sprint_id}`)
+          );
+        } else {
+          dbg(`  no cascade`);
+        }
+      }
       const cascadedIds = new Set<number>(
         (moveResult.cascaded_tasks ?? []).map((t: { id: number }) => t.id)
       );
@@ -342,7 +371,9 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
       }
 
       // Stilles Refetch — kein Loading-Flackern, kein Scroll-Sprung
+      if (debugMode) dbg(`silentRefetch START`);
       await silentRefetch();
+      if (debugMode) dbg(`silentRefetch DONE`);
 
       // Undo-Aktion: nur wenn originalSprintId bekannt und verschieden
       const undoAction = originalSprintId && originalSprintId !== targetSprintId
@@ -460,38 +491,81 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
       {/* Filter-Leiste */}
       <FilterBar locations={locations} filters={filters} onChange={setFilters} />
 
-      {/* Debug-Leiste */}
-      {debugMode && <div className="mx-6 mb-2 p-3 bg-gray-900 text-white rounded-lg text-xs font-mono flex gap-4 flex-wrap items-center">
-        <span className="opacity-50">dragging:</span>
-        <span>{activeTask ? `task-${activeTask.id} loc=${activeTask.location.id} prio=${activeTask.priority}` : "—"}</span>
-        <span className="opacity-30">|</span>
-        <span className="opacity-50">live over.id:</span>
-        <span>{liveOverId ?? "—"}</span>
-        {debugDrop && (
-          <>
+      {/* Debug-Panel */}
+      {debugMode && (
+        <div className="mx-6 mb-2 space-y-2 text-xs font-mono">
+          {/* Drag-Info */}
+          <div className="p-2 bg-gray-900 text-white rounded-lg flex gap-4 flex-wrap items-center">
+            <span className="opacity-50">dragging:</span>
+            <span>{activeTask ? `task-${activeTask.id} loc=${activeTask.location.id} prio=${activeTask.priority}` : "—"}</span>
             <span className="opacity-30">|</span>
-            <span className="opacity-50">action:</span>
-            <span>{debugDrop.action}</span>
-            <span className="opacity-30">|</span>
-            <span className="opacity-50">drop over.id:</span>
-            <span>{debugDrop.overId}</span>
-            <span className="opacity-50">dragged loc:</span>
-            <span>{debugDrop.draggedLoc ?? "?"}</span>
-            <span className="opacity-50">over loc:</span>
-            <span>{debugDrop.overLoc ?? "?"}</span>
-            <span className="opacity-50">same loc?</span>
-            <span>{debugDrop.draggedLoc === debugDrop.overLoc ? "✓" : "✗ MISMATCH"}</span>
-            <span className="opacity-50">insertBefore:</span>
-            <span>{debugDrop.insertBefore ?? "end"}</span>
-            {debugDrop.oldIdx !== undefined && (
+            <span className="opacity-50">live over.id:</span>
+            <span>{liveOverId ?? "—"}</span>
+            {debugDrop && (
               <>
-                <span className="opacity-50">oldIdx:</span>
-                <span>{debugDrop.oldIdx}</span>
+                <span className="opacity-30">|</span>
+                <span className="opacity-50">action:</span>
+                <span>{debugDrop.action}</span>
+                <span className="opacity-30">|</span>
+                <span className="opacity-50">drop.overId:</span>
+                <span>{debugDrop.overId}</span>
+                <span className="opacity-50">insertBefore:</span>
+                <span>{debugDrop.insertBefore ?? "end"}</span>
               </>
             )}
-          </>
-        )}
-      </div>}
+            <button
+              onClick={() => setDebugEvents([])}
+              className="ml-auto px-2 py-0.5 bg-gray-700 hover:bg-gray-600 rounded text-gray-300"
+            >
+              clear log
+            </button>
+          </div>
+
+          {/* Kapazitäts-Tabelle (live vs. server) */}
+          <div className="p-2 bg-gray-800 text-white rounded-lg overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-gray-400">
+                  <th className="text-left pr-3">Sprint</th>
+                  <th className="text-left pr-3">Loc</th>
+                  <th className="text-right pr-3">live used</th>
+                  <th className="text-right pr-3">srv used</th>
+                  <th className="text-right pr-3">max</th>
+                  <th className="text-right pr-3">tasks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sprintsWithLiveCapacity.map((sp) =>
+                  sp.capacities.map((cap) => {
+                    const serverCap = sprints.find((s) => s.id === sp.id)?.capacities.find((c) => c.location_id === cap.location_id);
+                    const diff = cap.used_action_points !== (serverCap?.used_action_points ?? 0);
+                    const taskCount = tasks.filter((t) => t.sprint.id === sp.id && t.location.id === cap.location_id).length;
+                    return (
+                      <tr key={`${sp.id}-${cap.location_id}`} className={diff ? "text-yellow-300" : "text-gray-300"}>
+                        <td className="pr-3">{sp.label}</td>
+                        <td className="pr-3">#{cap.location_id}</td>
+                        <td className="text-right pr-3 font-bold">{cap.used_action_points}</td>
+                        <td className="text-right pr-3 opacity-60">{serverCap?.used_action_points ?? "?"}</td>
+                        <td className="text-right pr-3">{cap.max_action_points}</td>
+                        <td className="text-right pr-3">{taskCount}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Event-Log */}
+          {debugEvents.length > 0 && (
+            <div className="p-2 bg-gray-950 text-green-400 rounded-lg max-h-48 overflow-y-auto">
+              {debugEvents.map((e, i) => (
+                <div key={i} className="leading-relaxed">{e}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Board */}
       <DndContext
