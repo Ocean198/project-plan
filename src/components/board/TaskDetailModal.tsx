@@ -78,7 +78,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
       const res = await fetch(`/api/activity?target_type=task&target_id=${task.id}&limit=50`);
       if (res.ok) {
         const data = await res.json();
-        setActivities(data.logs);
+        setActivities(data.logs.filter((l: ActivityEntry) => l.action !== "task_priority_changed"));
       }
     } finally {
       setLoadingActivities(false);
