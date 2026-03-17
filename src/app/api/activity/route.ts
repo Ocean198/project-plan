@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const userId = searchParams.get("user_id");
   const action = searchParams.get("action");
   const targetType = searchParams.get("target_type");
+  const targetId = searchParams.get("target_id");
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "50")));
   const skip = (page - 1) * limit;
@@ -21,6 +22,7 @@ export async function GET(req: Request) {
     if (userId) where.user_id = parseInt(userId);
     if (action) where.action = action;
     if (targetType) where.target_type = targetType;
+    if (targetId) where.target_id = parseInt(targetId);
 
     const [logs, total] = await Promise.all([
       prisma.activityLog.findMany({

@@ -4,7 +4,7 @@ import {
   getSession, hasRole, unauthorized, forbidden, badRequest,
   notFound, serverError, parseBody,
 } from "@/lib/api-helpers";
-import { logTaskCompleted, logTaskPriorityChanged, logTaskLocationChanged } from "@/lib/activity-logger";
+import { logTaskCompleted, logTaskPriorityChanged, logTaskLocationChanged, logTaskStatusChanged } from "@/lib/activity-logger";
 import { executeLocationChange } from "@/lib/capacity";
 import { triggerWebhooks } from "@/lib/webhook";
 import { getPermissions, can } from "@/lib/permissions";
@@ -80,6 +80,10 @@ export async function PATCH(
             sprint: { select: { id: true, label: true } },
           },
         });
+        await logTaskStatusChanged(parseInt(session.user.id), taskId, {
+          old_status: "completed",
+          new_status: body.status,
+        });
         return NextResponse.json(updated);
       }
       return forbidden("Abgeschlossene Aufgaben können nicht mehr bearbeitet werden.");
@@ -151,6 +155,10 @@ export async function PATCH(
         // Webhook fire-and-forget after DB update (done below)
       } else {
         updateData.status = body.status;
+        await logTaskStatusChanged(parseInt(session.user.id), taskId, {
+          old_status: task.status,
+          new_status: body.status,
+        });
       }
     }
 

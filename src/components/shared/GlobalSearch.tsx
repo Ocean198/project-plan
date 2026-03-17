@@ -101,6 +101,7 @@ export function GlobalSearch({ onTaskSelect }: GlobalSearchProps) {
   }
 
   function handleSelect(task: BoardTask) {
+    window.dispatchEvent(new CustomEvent("sprintboard:openTask", { detail: { taskId: task.id } }));
     onTaskSelect?.(task);
     setOpen(false);
     setQuery("");

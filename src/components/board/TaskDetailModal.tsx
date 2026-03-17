@@ -16,10 +16,17 @@ const ACTION_LABELS: Record<string, string> = {
   task_created: "Aufgabe erstellt",
   task_moved: "Aufgabe verschoben",
   task_completed: "Aufgabe abgeschlossen",
+  task_status_changed: "Status geändert",
   task_priority_changed: "Priorität geändert",
   task_location_changed: "Standort geändert",
   task_commented: "Kommentar",
   cascade_triggered: "Cascade ausgelöst",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  open: "Offen",
+  in_progress: "In Bearbeitung",
+  completed: "Abgeschlossen",
 };
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
@@ -68,13 +75,10 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
   async function loadActivities() {
     setLoadingActivities(true);
     try {
-      const res = await fetch(`/api/activity?target_type=task&limit=20`);
+      const res = await fetch(`/api/activity?target_type=task&target_id=${task.id}&limit=50`);
       if (res.ok) {
         const data = await res.json();
-        const taskActivities = data.logs.filter(
-          (l: ActivityEntry & { target_id: number }) => l.target_id === task.id
-        );
-        setActivities(taskActivities);
+        setActivities(data.logs);
       }
     } finally {
       setLoadingActivities(false);
@@ -92,6 +96,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
     try {
       await onStatusChange(task.id, status);
       setCurrentStatus(status);
+      await loadActivities();
     } finally {
       setChangingStatus(false);
     }
@@ -321,6 +326,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
                 try {
                   await onStatusChange(task.id, "open");
                   setCurrentStatus("open");
+                  await loadActivities();
                 } finally {
                   setChangingStatus(false);
                 }
@@ -385,6 +391,9 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
                         <p className="text-gray-600 mt-0.5 text-[11px] bg-gray-50 rounded px-2 py-1 whitespace-pre-wrap">
                           {entry.details.comment}
                         </p>
+                      )}
+                      {entry.action === "task_status_changed" && typeof entry.details?.old_status === "string" && typeof entry.details?.new_status === "string" && (
+                        <span className="text-gray-400 text-[11px]"> ({STATUS_LABELS[entry.details.old_status] ?? entry.details.old_status} → {STATUS_LABELS[entry.details.new_status] ?? entry.details.new_status})</span>
                       )}
                       <p className="text-gray-400 text-[11px] mt-0.5">{formatDate(entry.created_at)}</p>
                     </div>

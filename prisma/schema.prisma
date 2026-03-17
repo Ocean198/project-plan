@@ -169,6 +169,7 @@ enum ActivityAction {
   task_created
   task_moved
   task_completed
+  task_status_changed
   task_priority_changed
   task_location_changed
   task_commented

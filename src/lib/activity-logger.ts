@@ -69,6 +69,14 @@ export async function logTaskLocationChanged(
   await logActivity({ userId, action: "task_location_changed", targetType: "task", targetId: taskId, details });
 }
 
+export async function logTaskStatusChanged(
+  userId: number,
+  taskId: number,
+  details: { old_status: string; new_status: string }
+) {
+  await logActivity({ userId, action: "task_status_changed", targetType: "task", targetId: taskId, details });
+}
+
 export async function logTaskCommented(
   userId: number,
   taskId: number,

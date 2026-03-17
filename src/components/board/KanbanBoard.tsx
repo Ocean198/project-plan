@@ -423,6 +423,17 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
     setSelectedTask(task);
   }, []);
 
+  // Listen for task selection from global search
+  useEffect(() => {
+    function handleOpenTask(e: Event) {
+      const taskId = (e as CustomEvent<{ taskId: number }>).detail.taskId;
+      const task = tasks.find((t) => t.id === taskId);
+      if (task) setSelectedTask(task);
+    }
+    window.addEventListener("sprintboard:openTask", handleOpenTask);
+    return () => window.removeEventListener("sprintboard:openTask", handleOpenTask);
+  }, [tasks]);
+
   async function handleLockChange(sprintId: number, newStatus: "open" | "soft_locked" | "hard_locked") {
     const sprint = sprints.find((s) => s.id === sprintId);
     const currentStatus = sprint?.lock_status;
@@ -615,7 +626,7 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
           </div>
         </div>
 
-        <DragOverlay modifiers={[restrictToWindowEdges]}>
+        <DragOverlay modifiers={[restrictToWindowEdges]} dropAnimation={null}>
           {activeTask && <TaskCardOverlay task={activeTask} />}
         </DragOverlay>
       </DndContext>
