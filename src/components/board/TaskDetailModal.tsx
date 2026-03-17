@@ -35,6 +35,12 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   completed: { label: "Abgeschlossen", classes: "bg-green-100 text-green-700" },
 };
 
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+
 function getApColor(sp: number): string {
   if (sp <= 3) return "bg-green-100 text-green-700";
   if (sp <= 6) return "bg-yellow-100 text-yellow-700";
@@ -46,17 +52,19 @@ interface TaskDetailModalProps {
   userRole: string;
   permissions: RolePermissions;
   locations: LocationInfo[];
+  currentUser: { id: number; name: string };
   onClose: () => void;
   onStatusChange: (taskId: number, status: "open" | "in_progress" | "completed") => Promise<void>;
   onDelete?: (taskId: number) => Promise<void>;
   onTaskUpdated?: (taskId: number) => void;
 }
 
-export function TaskDetailModal({ task, userRole, permissions, locations, onClose, onStatusChange, onDelete, onTaskUpdated }: TaskDetailModalProps) {
+export function TaskDetailModal({ task, userRole, permissions, locations, currentUser, onClose, onStatusChange, onDelete, onTaskUpdated }: TaskDetailModalProps) {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [changingStatus, setChangingStatus] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(task.status);
+  const [currentAssignee, setCurrentAssignee] = useState<{ id: number; name: string } | null>(task.assignee);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [currentActionPoints, setCurrentActionPoints] = useState(task.action_points);
@@ -96,6 +104,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
     try {
       await onStatusChange(task.id, status);
       setCurrentStatus(status);
+      setCurrentAssignee(status === "in_progress" ? currentUser : null);
       await loadActivities();
     } finally {
       setChangingStatus(false);
@@ -263,6 +272,9 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
             <span className={`text-xs font-medium px-2 py-1 rounded ${STATUS_CONFIG[currentStatus]?.classes}`}>
               {STATUS_CONFIG[currentStatus]?.label}
             </span>
+            {currentAssignee && (
+              <span className="text-xs text-gray-500 font-medium">{currentAssignee.name}</span>
+            )}
           </div>
 
           {/* Beschreibung */}
@@ -326,6 +338,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
                 try {
                   await onStatusChange(task.id, "open");
                   setCurrentStatus("open");
+                  setCurrentAssignee(null);
                   await loadActivities();
                 } finally {
                   setChangingStatus(false);
@@ -377,7 +390,7 @@ export function TaskDetailModal({ task, userRole, permissions, locations, onClos
                 {activities.map((entry) => (
                   <div key={entry.id} className="flex items-start gap-2.5 text-xs">
                     <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
-                      {entry.user?.name.charAt(0) ?? "S"}
+                      {entry.user ? getInitials(entry.user.name) : "SY"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="font-medium text-gray-700">

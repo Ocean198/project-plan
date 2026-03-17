@@ -27,6 +27,7 @@ import { can, type RolePermissions } from "@/lib/permissions";
 interface KanbanBoardProps {
   userRole: string;
   permissions: RolePermissions;
+  currentUser: { id: number; name: string };
 }
 
 interface PendingMove {
@@ -37,7 +38,7 @@ interface PendingMove {
   insertBeforeTaskId?: number;
 }
 
-export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
+export function KanbanBoard({ userRole, permissions, currentUser }: KanbanBoardProps) {
   const { sprints, tasks, setTasks, loading, error, refetch, silentRefetch } = useBoardData();
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
   const [liveOverId, setLiveOverId] = useState<string | null>(null);
@@ -676,6 +677,7 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
           userRole={userRole}
           permissions={permissions}
           locations={locations}
+          currentUser={currentUser}
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleStatusChange}
           onDelete={can(userRole, 'board.delete_tasks', permissions) ? handleDeleteTask : undefined}

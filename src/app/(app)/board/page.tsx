@@ -11,7 +11,11 @@ export default async function BoardPage() {
         <BoardTitle />
         <p className="text-sm text-gray-400 mt-0.5">Aufgaben nach Sprint und Standort</p>
       </div>
-      <KanbanBoard userRole={session!.user.role} permissions={permissions} />
+      <KanbanBoard
+        userRole={session!.user.role}
+        permissions={permissions}
+        currentUser={{ id: parseInt(session!.user.id), name: session!.user.name ?? "" }}
+      />
     </div>
   );
 }
