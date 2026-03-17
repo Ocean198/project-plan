@@ -1,6 +1,6 @@
 # ressourcify
 
-Standortbasiertes Sprint- und Kapazitätsmanagement-Tool. Ermöglicht Teams, Story Points über mehrere Standorte hinweg zu planen, Sprints zu verwalten und den Fortschritt in Echtzeit zu verfolgen.
+**Version 1.1** · Standortbasiertes Sprint- und Kapazitätsmanagement-Tool. Ermöglicht Teams, Story Points über mehrere Standorte hinweg zu planen, Sprints zu verwalten und den Fortschritt in Echtzeit zu verfolgen.
 
 ---
 
@@ -153,6 +153,8 @@ Admins können unter **Einstellungen → Berechtigungen** festlegen, welche Roll
 | `board.edit_story_points` | Story Points bearbeiten | User |
 | `board.delete_tasks` | Tasks löschen | – |
 | `board.reopen_tasks` | Abgeschlossene Tasks wieder öffnen | – |
+| `board.change_location` | Standort eines Tasks ändern | Sales |
+| `board.create_tasks` | Tasks manuell erstellen | Sales |
 | `sprints.lock_unlock` | Sprints sperren / entsperren | – |
 | `sprints.archive` | Sprints archivieren | – |
 | `settings.access` | Settings-Menü aufrufen | – |
@@ -171,6 +173,8 @@ Admins können unter **Einstellungen → Berechtigungen** festlegen, welche Roll
 - Bei Kapazitätsüberschreitung: **Cascade** – andere Aufgaben werden automatisch in den nächsten Sprint verschoben (mit Vorschau-Dialog)
 - Tasks mit Status `in_progress` sind gesperrt (kein Drag möglich)
 - Beim Ablegen vor einem gesperrten Task: automatisches Einreihen dahinter
+- **+ Aufgabe erstellen**-Button in der Filter-Leiste (Sales + Admin): öffnet Modal zur schnellen Task-Erstellung
+- Globale Suche (Cmd/Ctrl+K): Klick auf Suchergebnis öffnet direkt das Task-Detail-Modal
 
 ### Sprint-Zustände
 
@@ -200,6 +204,15 @@ Admins können unter **Einstellungen → Berechtigungen** festlegen, welche Roll
 - Velocity-Chart: abgeschlossene SP pro Standort über die letzten 12 Monate
 - Sprint-Warnungen bei ≥ 90% Auslastung
 
+### Task-Detail-Modal
+
+Klick auf einen Task öffnet das Detail-Modal mit:
+- Standort-Wechsel per Dropdown (direkt neben SP)
+- Story Points editierbar per Dropdown (auto-save)
+- Status-Änderung mit Buttons
+- Kommentarfeld (wird im Aktivitätslog des Tasks gespeichert)
+- Mini-Aktivitätslog des Tasks (zeigt Status-, Standort-, Kommentar- und Verschiebeaktionen)
+
 ### Aktivitätslog
 
 Protokolliert alle relevanten Aktionen:
@@ -209,6 +222,9 @@ Protokolliert alle relevanten Aktionen:
 | `task_created` | Neue Aufgabe angelegt |
 | `task_moved` | Aufgabe in anderen Sprint verschoben |
 | `task_completed` | Aufgabe abgeschlossen |
+| `task_status_changed` | Status geändert (z. B. Offen → In Bearbeitung) |
+| `task_location_changed` | Standort geändert |
+| `task_commented` | Kommentar hinzugefügt |
 | `task_priority_changed` | Priorität geändert |
 | `task_imported` | Aufgabe per Import angelegt |
 | `cascade_triggered` | Automatische Weiterverschiebung ausgelöst |

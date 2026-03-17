@@ -353,3 +353,54 @@ Tabbed-Navigation mit 4 Bereichen (nur für Admins zugänglich, Redirect für an
 - localStorage-basiert (`sprintboard_welcomed`), nie wieder angezeigt nach Bestätigung
 - Erklärt 3 Kern-Features: Kanban, Dashboard, Cmd+K Suche
 - Eingebunden in `AppShell`
+
+---
+
+## Version 1.1 ✅
+
+**Abgeschlossen am:** 17.03.2026
+
+### Neue Features
+
+#### Schnelle Task-Erstellung direkt im Board
+- `+ Aufgabe erstellen`-Button in der Filter-Leiste (nur für Rollen mit `board.create_tasks`-Berechtigung)
+- Neues Modal `src/components/board/CreateTaskModal.tsx` mit Feldern: Titel, Standort, Story Points (1–10), Beschreibung
+- Farbstreifen oben im Modal wechselt dynamisch mit gewähltem Standort
+- Task wird automatisch dem frühestmöglichen Sprint mit freier Kapazität zugewiesen
+- Neue Permission: `board.create_tasks` (Standard: Sales)
+
+#### Standort-Wechsel im Task-Detail-Modal
+- Standort-Dropdown direkt neben dem SP-Dropdown im Badge-Bereich
+- Standortwechsel löst Cascade-Logik aus (neuer Standort übernimmt die Task-Position im Sprint oder verschiebt sie bei Overflow)
+- Aktivitätslog-Eintrag `task_location_changed` mit altem und neuem Standort
+- Neue Permission: `board.change_location` (Standard: Sales)
+- Neue Lib-Funktion: `executeLocationChange()` in `src/lib/capacity.ts`
+
+#### Kommentare im Task-Detail-Modal
+- Textarea + „Kommentar speichern"-Button im Task-Modal
+- Kommentare werden als `task_commented`-Einträge im Aktivitätslog gespeichert
+- Neuer Endpoint: `POST /api/tasks/[id]/comment`
+- Kommentartext wird im Mini-Aktivitätslog des Tasks inline angezeigt
+
+#### Status-Änderungen im Task-Aktivitätslog
+- Statuswechsel (`open` ↔ `in_progress`, Wiedereröffnen) werden jetzt als `task_status_changed` im Aktivitätslog des Tasks protokolliert
+- Anzeige im Mini-Aktivitätslog: z. B. „Status geändert (Offen → In Bearbeitung)"
+- Aktivitätslog-Ansicht im Modal lädt nach jeder Statusänderung automatisch neu
+- Neues Schema-Enum-Wert: `task_status_changed` in `ActivityAction`
+- Neue Funktion: `logTaskStatusChanged()` in `src/lib/activity-logger.ts`
+
+### Bug-Fixes
+
+#### Suche: Klick auf Ergebnis öffnet Detail-Modal
+- **Problem:** Klick auf ein Suchergebnis in `GlobalSearch` öffnete das Task-Detail-Modal nicht, weil `AppShell` die `onTaskSelect`-Callback nicht weiterleitete.
+- **Fix:** `GlobalSearch` dispatcht beim Auswählen ein `CustomEvent("sprintboard:openTask", { detail: { taskId } })` auf `window`. `KanbanBoard` lauscht darauf und öffnet das Modal mit dem passenden Task.
+
+#### Drag & Drop: Snap-back-Animation beim Loslassen
+- **Problem:** Beim Loslassen eines gezogenen Tasks in einem anderen Sprint animierte die Karte kurz zurück Richtung alter Position.
+- **Fix:** `DragOverlay` erhält `dropAnimation={null}` – deaktiviert die Standard-Rückkehr-Animation von dnd-kit.
+
+### Sonstige Verbesserungen
+
+- Activity-API: neuer Query-Parameter `target_id` für direktes serverseitiges Filtern nach Task-ID (verhindert Limit-Probleme beim client-seitigen Filtern)
+- Task-Detail-Modal: `task_priority_changed`-Einträge werden im Mini-Aktivitätslog ausgeblendet (zu viel Rauschen durch Drag & Drop)
+- Task-Detail-Modal: Mini-Aktivitätslog lädt direkt nach Standort- und Statusänderungen neu
