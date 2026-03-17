@@ -39,6 +39,7 @@ export async function GET(req: Request) {
           location: { select: { id: true, name: true, color: true } },
           sprint: { select: { id: true, label: true, year: true, month: true, lock_status: true } },
           creator: { select: { id: true, name: true } },
+          assignee: { select: { id: true, name: true } },
         },
         orderBy: [{ sprint: { year: "asc" } }, { sprint: { month: "asc" } }, { priority: "asc" }],
         skip,

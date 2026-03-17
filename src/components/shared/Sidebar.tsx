@@ -95,6 +95,12 @@ interface SidebarProps {
   canAccessSettings: boolean;
 }
 
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+
 export function Sidebar({ userRole, userName, canAccessSettings }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
@@ -167,7 +173,7 @@ export function Sidebar({ userRole, userName, canAccessSettings }: SidebarProps)
       <div className="border-t border-gray-100 p-3">
         <div className={`flex items-center gap-2 ${collapsed ? "justify-center" : ""}`}>
           <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold shrink-0">
-            {userName.charAt(0).toUpperCase()}
+            {getInitials(userName)}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">

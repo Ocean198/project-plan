@@ -72,12 +72,14 @@ model Task {
   external_ticket_id String?    @unique
   completed_at       DateTime?
   created_by         Int
+  assigned_to        Int?
   created_at         DateTime   @default(now())
   updated_at         DateTime   @updatedAt
 
   location           Location   @relation(fields: [location_id], references: [id])
   sprint             Sprint     @relation(fields: [sprint_id], references: [id])
-  creator            User       @relation(fields: [created_by], references: [id])
+  creator            User       @relation("TaskCreator", fields: [created_by], references: [id])
+  assignee           User?      @relation("TaskAssignee", fields: [assigned_to], references: [id])
 
   @@map("tasks")
 }
@@ -98,7 +100,8 @@ model User {
   created_at DateTime     @default(now())
   updated_at DateTime     @updatedAt
 
-  tasks          Task[]
+  created_tasks  Task[]       @relation("TaskCreator")
+  assigned_tasks Task[]       @relation("TaskAssignee")
   user_locations UserLocation[]
   notifications  Notification[]
   activity_logs  ActivityLog[]

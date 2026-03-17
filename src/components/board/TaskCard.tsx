@@ -4,6 +4,12 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { BoardTask } from "@/types/board";
 
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+
 function getApColor(sp: number): { bg: string; text: string } {
   if (sp <= 3) return { bg: "bg-green-100", text: "text-green-700" };
   if (sp <= 6) return { bg: "bg-yellow-100", text: "text-yellow-700" };
@@ -96,14 +102,28 @@ export function TaskCard({ task, onClick, isDraggingDisabled }: TaskCardProps) {
           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${statusCfg.classes}`}>
             {statusCfg.label}
           </span>
+
+          {/* Assignee-Name */}
+          {task.assignee && (
+            <span className="text-xs text-gray-400 font-medium truncate max-w-[90px]">
+              {task.assignee.name}
+            </span>
+          )}
         </div>
 
-        {/* Externe Ticket-ID */}
-        {task.external_ticket_id && (
-          <div className="mt-2">
-            <span className="text-xs text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-              {task.external_ticket_id}
-            </span>
+        {/* Untere Zeile: Ticket-ID + Assignee-Avatar */}
+        {(task.external_ticket_id || task.assignee) && (
+          <div className="mt-2 flex items-center justify-between">
+            {task.external_ticket_id ? (
+              <span className="text-xs text-gray-400 font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
+                {task.external_ticket_id}
+              </span>
+            ) : <span />}
+            {task.assignee && (
+              <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                {getInitials(task.assignee.name)}
+              </div>
+            )}
           </div>
         )}
       </div>

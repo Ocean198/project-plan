@@ -25,6 +25,7 @@ export interface BoardTask {
   location: LocationInfo;
   sprint: SprintInfo;
   creator: { id: number; name: string };
+  assignee: { id: number; name: string } | null;
 }
 
 export interface SprintCapacityInfo {

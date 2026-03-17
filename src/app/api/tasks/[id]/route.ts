@@ -27,6 +27,7 @@ export async function GET(
         location: { select: { id: true, name: true, color: true } },
         sprint: { select: { id: true, label: true, year: true, month: true, lock_status: true } },
         creator: { select: { id: true, name: true } },
+        assignee: { select: { id: true, name: true } },
       },
     });
 
@@ -74,10 +75,15 @@ export async function PATCH(
       if (can(role, 'board.reopen_tasks', permissions) && body.status && body.status !== "completed") {
         const updated = await prisma.task.update({
           where: { id: taskId },
-          data: { status: body.status, completed_at: null },
+          data: {
+            status: body.status,
+            completed_at: null,
+            assigned_to: body.status === "in_progress" ? parseInt(session.user.id) : null,
+          },
           include: {
             location: { select: { id: true, name: true, color: true } },
             sprint: { select: { id: true, label: true } },
+            assignee: { select: { id: true, name: true } },
           },
         });
         await logTaskStatusChanged(parseInt(session.user.id), taskId, {
@@ -122,6 +128,7 @@ export async function PATCH(
           location: { select: { id: true, name: true, color: true } },
           sprint: { select: { id: true, label: true, year: true, month: true, lock_status: true } },
           creator: { select: { id: true, name: true } },
+          assignee: { select: { id: true, name: true } },
         },
       });
       return NextResponse.json(updated);
@@ -148,13 +155,22 @@ export async function PATCH(
       if (body.status === "completed") {
         updateData.status = "completed";
         updateData.completed_at = new Date();
+        updateData.assigned_to = null;
         await logTaskCompleted(parseInt(session.user.id), taskId, {
           title: task.title,
           sprint_id: task.sprint_id,
         });
         // Webhook fire-and-forget after DB update (done below)
+      } else if (body.status === "in_progress") {
+        updateData.status = "in_progress";
+        updateData.assigned_to = parseInt(session.user.id);
+        await logTaskStatusChanged(parseInt(session.user.id), taskId, {
+          old_status: task.status,
+          new_status: body.status,
+        });
       } else {
         updateData.status = body.status;
+        updateData.assigned_to = null;
         await logTaskStatusChanged(parseInt(session.user.id), taskId, {
           old_status: task.status,
           new_status: body.status,
@@ -168,6 +184,7 @@ export async function PATCH(
       include: {
         location: { select: { id: true, name: true, color: true } },
         sprint: { select: { id: true, label: true } },
+        assignee: { select: { id: true, name: true } },
       },
     });
 
