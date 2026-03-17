@@ -377,7 +377,7 @@
 <header>
   <span class="logo">ressourcify</span>
   <span class="logo-badge">Benutzerhandbuch</span>
-  <span class="header-right">Version 1.0 &nbsp;·&nbsp; März 2026</span>
+  <span class="header-right">Version 1.1 &nbsp;·&nbsp; März 2026</span>
 </header>
 
 <!-- SIDEBAR -->
@@ -429,7 +429,7 @@
     <div class="hero-meta">
       <span class="hero-chip">Für Viewer &amp; Sales</span>
       <span class="hero-chip">Deutsch</span>
-      <span class="hero-chip">Version 1.0</span>
+      <span class="hero-chip">Version 1.1</span>
     </div>
   </section>
 
@@ -503,6 +503,16 @@
         <td><span class="check">✓</span></td>
       </tr>
       <tr>
+        <td>Neue Aufgabe direkt auf dem Board erstellen</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Standort einer Aufgabe im Detail-Fenster ändern</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
         <td>Tasks löschen / wiedereröffnen</td>
         <td><span class="cross">—</span></td>
         <td><span class="cross">—</span></td>
@@ -554,6 +564,14 @@
     du auch den <strong>Abmelden</strong>-Button.
   </p>
 
+  <h3>Globale Suche</h3>
+  <p>
+    Oben in der Kopfzeile findest du ein <strong>Suchfeld</strong>. Tippe dort einen
+    Aufgabentitel oder Teile davon ein, um passende Tasks sofort zu finden.
+    Ein Klick auf ein Suchergebnis öffnet direkt das <strong>Task-Detail-Fenster</strong>
+    auf dem Board.
+  </p>
+
   <!-- ═══ BOARD ═══ -->
   <h2 id="board">Das Board – Überblick</h2>
   <p>
@@ -575,6 +593,22 @@
     <div class="callout-body">
       <strong>Sortierung = Priorität</strong>
       <p>Tasks sind innerhalb jeder Spalte nach Priorität sortiert. Oben stehen die wichtigsten Aufgaben. Die Reihenfolge wird beim Verschieben automatisch angepasst.</p>
+    </div>
+  </div>
+
+  <h3>Neue Aufgabe erstellen <span class="role sales">nur Sales</span></h3>
+  <p>
+    Oben rechts im Board befindet sich der Button <strong>„+ Aufgabe erstellen"</strong>.
+    Ein Klick öffnet ein Formular, in dem du Titel, Standort, Sprint und Story Points
+    der neuen Aufgabe eingibst. Nach dem Speichern erscheint der Task sofort an der
+    richtigen Stelle im Board – ggf. mit automatischer Cascade-Prüfung.
+  </p>
+
+  <div class="callout sales-only">
+    <span class="callout-icon">🟣</span>
+    <div class="callout-body">
+      <strong>Sales-Funktion</strong>
+      <p>Der Button „+ Aufgabe erstellen" ist nur für Nutzer mit der Rolle „Sales" sichtbar.</p>
     </div>
   </div>
 
@@ -720,14 +754,44 @@
     <li><strong>Sprint</strong>, in dem die Aufgabe liegt</li>
     <li><strong>Externe Ticket-ID</strong> (z.&thinsp;B. aus Pipedrive oder Jira), falls vorhanden</li>
     <li><strong>Story Points</strong> (editierbar – siehe unten)</li>
+    <li><strong>Standort</strong> (änderbar per Dropdown – nur Sales)</li>
     <li><strong>Status</strong> (ggf. änderbar – Sales only)</li>
     <li><strong>Beschreibung</strong> (Freitext, falls hinterlegt)</li>
+    <li><strong>Kommentarfeld</strong> – für Notizen und Rückfragen</li>
     <li><strong>Erstellt von</strong> und <strong>Erstellungsdatum</strong></li>
     <li><strong>Abschlussdatum</strong> (nur wenn abgeschlossen)</li>
-    <li><strong>Aktivitäts-Log</strong> (letzte 10 Ereignisse zu diesem Task)</li>
+    <li><strong>Aktivitäts-Log</strong> – chronologische Ereignisübersicht zu diesem Task</li>
   </ul>
 
   <p>Das Fenster schließt du mit dem <strong>×</strong>-Button oben rechts oder einem Klick daneben.</p>
+
+  <h3>Standort ändern <span class="role sales">nur Sales</span></h3>
+  <p>
+    Im Detail-Fenster kannst du den Standort einer Aufgabe direkt ändern. Wähle im
+    Dropdown neben „Standort" den neuen Standort aus. Die Kapazität beider Standorte
+    wird sofort neu berechnet – ggf. wird eine Cascade-Prüfung angestoßen.
+  </p>
+
+  <h3>Kommentare</h3>
+  <p>
+    Im unteren Bereich des Detail-Fensters findest du ein <strong>Kommentarfeld</strong>.
+    Gib dort Notizen, Rückfragen oder Hinweise ein und klicke auf <strong>„Kommentar speichern"</strong>.
+    Kommentare werden im Aktivitäts-Log des Tasks festgehalten und sind für alle Nutzer sichtbar.
+  </p>
+
+  <h3>Aktivitäts-Log im Task-Detail</h3>
+  <p>
+    Jeder Task hat einen eigenen <strong>Aktivitäts-Log</strong>, der die wichtigsten
+    Ereignisse zu genau dieser Aufgabe zeigt:
+  </p>
+  <ul>
+    <li>Aufgabe erstellt</li>
+    <li>Status geändert (z.&thinsp;B. Offen → In Bearbeitung)</li>
+    <li>Aufgabe verschoben (Sprint A → Sprint B)</li>
+    <li>Aufgabe abgeschlossen</li>
+    <li>Kommentare</li>
+  </ul>
+  <p>Prioritätsänderungen erscheinen hier bewusst nicht, um den Log übersichtlich zu halten.</p>
 
   <!-- ═══ STATUS ═══ -->
   <h2 id="status">Status ändern <span class="role sales">nur Sales</span></h2>
@@ -961,8 +1025,8 @@
   <p>Jeder Eintrag zeigt:</p>
   <ul>
     <li>Den <strong>Nutzer</strong>, der die Aktion durchgeführt hat</li>
-    <li>Die <strong>Aktion</strong> (z.&thinsp;B. „Aufgabe verschoben", „Cascade ausgelöst")</li>
-    <li>Relevante <strong>Details</strong> (z.&thinsp;B. „Sprint A → Sprint B" oder „3 SP")</li>
+    <li>Die <strong>Aktion</strong> (z.&thinsp;B. „Aufgabe verschoben", „Status geändert", „Cascade ausgelöst")</li>
+    <li>Relevante <strong>Details</strong> (z.&thinsp;B. „Sprint A → Sprint B", „Offen → In Bearbeitung")</li>
     <li>Den <strong>Zeitpunkt</strong> (relativ, z.&thinsp;B. „vor 5 Min.")</li>
   </ul>
 
@@ -1074,6 +1138,14 @@
     <strong>Aktivitäts-Seite</strong>.
   </p>
 
+  <h3>Ich habe über die Suche einen Task gefunden, aber es passiert nichts beim Klick.</h3>
+  <p>
+    Stelle sicher, dass du dich auf der <strong>Board-Seite</strong> befindest. Die Suche
+    öffnet das Task-Detail-Fenster direkt im Board. Auf anderen Seiten (Liste, Dashboard)
+    wird die Suche zwar angezeigt, das automatische Öffnen des Modals funktioniert aber
+    nur auf dem Board.
+  </p>
+
   <h3>Wie drucke ich dieses Handbuch?</h3>
   <p>
     Nutze im Browser <strong>Drucken</strong> (Strg+P / ⌘+P) oder
@@ -1082,7 +1154,7 @@
 
   <hr class="divider" />
   <p style="text-align:center;color:var(--gray-500);font-size:13px;">
-    ressourcify Benutzerhandbuch · Version 1.0 · März 2026
+    ressourcify Benutzerhandbuch · Version 1.1 · März 2026
   </p>
 
 </main>
