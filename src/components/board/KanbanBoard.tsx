@@ -20,6 +20,7 @@ import { SprintColumn } from "./SprintColumn";
 import { TaskCard, TaskCardOverlay } from "./TaskCard";
 import { CascadeConfirmDialog } from "./CascadeConfirmDialog";
 import { TaskDetailModal } from "./TaskDetailModal";
+import { CreateTaskModal } from "./CreateTaskModal";
 import type { BoardTask, BoardSprint, ActiveFilters, CascadePreview, LocationInfo } from "@/types/board";
 import { can, type RolePermissions } from "@/lib/permissions";
 
@@ -58,6 +59,7 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
   const [moveLoading, setMoveLoading] = useState(false);
   const [archiveConfirm, setArchiveConfirm] = useState<{ sprintId: number; label: string } | null>(null);
+  const [showCreateTask, setShowCreateTask] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error"; undoAction?: () => void } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -488,8 +490,23 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Filter-Leiste */}
-      <FilterBar locations={locations} filters={filters} onChange={setFilters} />
+      {/* Filter-Leiste + Aufgabe erstellen */}
+      <div className="flex items-center gap-3 pr-6">
+        <div className="flex-1">
+          <FilterBar locations={locations} filters={filters} onChange={setFilters} />
+        </div>
+        {can(userRole, 'board.create_tasks', permissions) && (
+          <button
+            onClick={() => setShowCreateTask(true)}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Aufgabe erstellen
+          </button>
+        )}
+      </div>
 
       {/* Debug-Panel */}
       {debugMode && (
@@ -647,9 +664,20 @@ export function KanbanBoard({ userRole, permissions }: KanbanBoardProps) {
           task={selectedTask}
           userRole={userRole}
           permissions={permissions}
+          locations={locations}
           onClose={() => setSelectedTask(null)}
           onStatusChange={handleStatusChange}
           onDelete={can(userRole, 'board.delete_tasks', permissions) ? handleDeleteTask : undefined}
+          onTaskUpdated={() => silentRefetch()}
+        />
+      )}
+
+      {/* Aufgabe erstellen Modal */}
+      {showCreateTask && (
+        <CreateTaskModal
+          locations={locations}
+          onClose={() => setShowCreateTask(false)}
+          onCreated={() => silentRefetch()}
         />
       )}
 

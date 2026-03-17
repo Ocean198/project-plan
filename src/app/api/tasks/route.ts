@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 
   if (!body) return badRequest("Ungültiger Request-Body.");
   if (!body.title?.trim()) return badRequest("Titel ist erforderlich.");
-  if (![1, 2, 3].includes(body.action_points)) return badRequest("Action Points müssen 1, 2 oder 3 sein.");
+  if (!Number.isInteger(body.action_points) || body.action_points < 1 || body.action_points > 10) return badRequest("Story Points müssen zwischen 1 und 10 liegen.");
   if (!body.location_id) return badRequest("Standort ist erforderlich.");
 
   try {

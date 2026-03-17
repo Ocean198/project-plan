@@ -170,6 +170,8 @@ enum ActivityAction {
   task_moved
   task_completed
   task_priority_changed
+  task_location_changed
+  task_commented
   cascade_triggered
   sprint_locked
   sprint_unlocked

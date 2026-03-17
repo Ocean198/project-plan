@@ -455,6 +455,168 @@ export async function executeCascade(
   });
 }
 
+// ─── Standort-Wechsel mit Cascade ─────────────────────────────────────────────
+
+export interface LocationChangeResult {
+  cascaded_tasks: Array<{ id: number; from_sprint_id: number; to_sprint_id: number }>;
+  new_sprints_created: number;
+}
+
+/**
+ * Ändert den Standort eines Tasks und löst ggf. Cascade für die neue Location aus.
+ * Der Task selbst bleibt im selben Sprint.
+ */
+export async function executeLocationChange(
+  taskId: number,
+  newLocationId: number
+): Promise<LocationChangeResult> {
+  await ensureMinimumFutureSprints();
+
+  return await prisma.$transaction(async (tx) => {
+    const task = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
+
+    if (task.status === "completed") {
+      throw new Error("Abgeschlossene Aufgaben können nicht bearbeitet werden.");
+    }
+
+    const sprint = await tx.sprint.findUniqueOrThrow({ where: { id: task.sprint_id } });
+    if (sprint.lock_status !== "open") {
+      throw new Error("Hard-gelockte Sprints können nicht bearbeitet werden.");
+    }
+
+    const newLocation = await tx.location.findUnique({ where: { id: newLocationId } });
+    if (!newLocation || !newLocation.is_active) {
+      throw new Error("Standort existiert nicht oder ist deaktiviert.");
+    }
+
+    // In-Memory AP-Tracking
+    const usedMap = new Map<string, number>();
+    const prependPriorityMap = new Map<string, number>();
+
+    const consumePrependPriority = async (sprintId: number, locationId: number): Promise<number> => {
+      const key = `${sprintId}:${locationId}`;
+      if (!prependPriorityMap.has(key)) {
+        const result = await tx.task.aggregate({
+          where: { sprint_id: sprintId, location_id: locationId },
+          _min: { priority: true },
+        });
+        prependPriorityMap.set(key, (result._min.priority ?? 1) - 1);
+      }
+      const val = prependPriorityMap.get(key)!;
+      prependPriorityMap.set(key, val - 1);
+      return val;
+    };
+
+    const getUsed = async (sprintId: number, locationId: number): Promise<number> => {
+      const key = `${sprintId}:${locationId}`;
+      if (usedMap.has(key)) return usedMap.get(key)!;
+      const result = await tx.task.aggregate({
+        where: { sprint_id: sprintId, location_id: locationId },
+        _sum: { action_points: true },
+      });
+      const val = result._sum.action_points ?? 0;
+      usedMap.set(key, val);
+      return val;
+    };
+
+    const modifyUsed = (sprintId: number, locationId: number, delta: number) => {
+      const key = `${sprintId}:${locationId}`;
+      usedMap.set(key, (usedMap.get(key) ?? 0) + delta);
+    };
+
+    const getMax = async (sprintId: number, locationId: number): Promise<number> => {
+      const capacity = await tx.sprintCapacity.findUnique({
+        where: { sprint_id_location_id: { sprint_id: sprintId, location_id: locationId } },
+      });
+      return capacity?.max_action_points ?? parseInt(process.env.DEFAULT_AP_BUDGET ?? "50");
+    };
+
+    // Pre-initialize beider Locations im Sprint
+    await getUsed(task.sprint_id, task.location_id);
+    await getUsed(task.sprint_id, newLocationId);
+
+    // Standort des Tasks ändern
+    await tx.task.update({
+      where: { id: taskId },
+      data: { location_id: newLocationId },
+    });
+
+    modifyUsed(task.sprint_id, task.location_id, -task.action_points);
+    modifyUsed(task.sprint_id, newLocationId, task.action_points);
+
+    const cascadedTasks: Array<{ id: number; from_sprint_id: number; to_sprint_id: number }> = [];
+    let newSprintsCreated = 0;
+
+    // Alle offenen Sprints ab aktuellem Sprint prüfen
+    const openSprints = await tx.sprint.findMany({
+      where: { lock_status: "open", id: { gte: task.sprint_id } },
+      orderBy: [{ year: "asc" }, { month: "asc" }],
+    });
+
+    for (let i = 0; i < openSprints.length; i++) {
+      const currentSprint = openSprints[i];
+      const used = await getUsed(currentSprint.id, newLocationId);
+      const max = await getMax(currentSprint.id, newLocationId);
+
+      if (used <= max) continue;
+
+      const tasksToEvict = await tx.task.findMany({
+        where: {
+          sprint_id: currentSprint.id,
+          location_id: newLocationId,
+          status: { not: "completed" },
+          id: { not: taskId },
+        },
+        orderBy: { priority: "desc" },
+      });
+
+      let remainingOverflow = used - max;
+
+      for (const t of tasksToEvict) {
+        if (remainingOverflow <= 0) break;
+
+        let nextSprint: Sprint;
+        if (i + 1 < openSprints.length) {
+          nextSprint = openSprints[i + 1];
+        } else {
+          const lastSprint = openSprints.at(-1)!;
+          const nextDate = new Date(lastSprint.year, lastSprint.month);
+          const newYear = nextDate.getFullYear();
+          const newMonth = nextDate.getMonth() + 1;
+          const label = new Date(newYear, newMonth - 1, 1).toLocaleDateString("de-DE", {
+            month: "long", year: "numeric",
+          });
+          nextSprint = await tx.sprint.create({ data: { year: newYear, month: newMonth, label } });
+          const activeLocations = await tx.location.findMany({ where: { is_active: true } });
+          for (const loc of activeLocations) {
+            const defaultAP = loc.default_action_points ?? parseInt(process.env.DEFAULT_AP_BUDGET ?? "50");
+            await tx.sprintCapacity.create({
+              data: { sprint_id: nextSprint.id, location_id: loc.id, max_action_points: defaultAP },
+            });
+          }
+          openSprints.push(nextSprint);
+          newSprintsCreated++;
+        }
+
+        const prependPriority = await consumePrependPriority(nextSprint.id, newLocationId);
+        await getUsed(nextSprint.id, newLocationId);
+        await tx.task.update({
+          where: { id: t.id },
+          data: { sprint_id: nextSprint.id, priority: prependPriority },
+        });
+
+        modifyUsed(currentSprint.id, newLocationId, -t.action_points);
+        modifyUsed(nextSprint.id, newLocationId, t.action_points);
+        remainingOverflow -= t.action_points;
+
+        cascadedTasks.push({ id: t.id, from_sprint_id: currentSprint.id, to_sprint_id: nextSprint.id });
+      }
+    }
+
+    return { cascaded_tasks: cascadedTasks, new_sprints_created: newSprintsCreated };
+  });
+}
+
 // ─── Kapazitäts-Rebalancing ───────────────────────────────────────────────────
 
 export interface RebalanceResult {

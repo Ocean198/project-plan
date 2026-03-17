@@ -4,7 +4,8 @@ import {
   getSession, hasRole, unauthorized, forbidden, badRequest,
   notFound, serverError, parseBody,
 } from "@/lib/api-helpers";
-import { logTaskCompleted, logTaskPriorityChanged } from "@/lib/activity-logger";
+import { logTaskCompleted, logTaskPriorityChanged, logTaskLocationChanged } from "@/lib/activity-logger";
+import { executeLocationChange } from "@/lib/capacity";
 import { triggerWebhooks } from "@/lib/webhook";
 import { getPermissions, can } from "@/lib/permissions";
 
@@ -47,7 +48,8 @@ export async function PATCH(
   const role = session.user.role;
   const canChangeStatus = can(role, 'board.change_status', permissions);
   const canEditSP = can(role, 'board.edit_story_points', permissions);
-  if (!canChangeStatus && !canEditSP) return forbidden();
+  const canChangeLocation = can(role, 'board.change_location', permissions);
+  if (!canChangeStatus && !canEditSP && !canChangeLocation) return forbidden();
 
   const { id } = await params;
   const taskId = parseInt(id);
@@ -56,6 +58,7 @@ export async function PATCH(
     title?: string;
     description?: string;
     action_points?: number;
+    location_id?: number;
     status?: "open" | "in_progress" | "completed";
     priority?: number;
   }>(req);
@@ -85,6 +88,39 @@ export async function PATCH(
     const sprint = await prisma.sprint.findUnique({ where: { id: task.sprint_id } });
     if (sprint?.lock_status === "hard_locked") {
       return forbidden("Hard-gelockte Sprints können nicht bearbeitet werden.");
+    }
+
+    // Location-Wechsel: eigener Pfad mit Cascade-Logik
+    if (body.location_id !== undefined) {
+      if (!canChangeLocation) return forbidden("Keine Berechtigung für Standortänderung.");
+      if (body.location_id === task.location_id) return NextResponse.json({ message: "Standort unverändert." });
+
+      const oldLocation = await prisma.location.findUnique({ where: { id: task.location_id } });
+      const newLocation = await prisma.location.findUnique({ where: { id: body.location_id } });
+      if (!newLocation || !newLocation.is_active) return badRequest("Standort existiert nicht oder ist deaktiviert.");
+
+      try {
+        await executeLocationChange(taskId, body.location_id);
+      } catch (e) {
+        return badRequest(e instanceof Error ? e.message : "Standortänderung fehlgeschlagen.");
+      }
+
+      await logTaskLocationChanged(parseInt(session.user.id), taskId, {
+        old_location_id: task.location_id,
+        new_location_id: body.location_id,
+        old_location_name: oldLocation?.name ?? String(task.location_id),
+        new_location_name: newLocation.name,
+      });
+
+      const updated = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          location: { select: { id: true, name: true, color: true } },
+          sprint: { select: { id: true, label: true, year: true, month: true, lock_status: true } },
+          creator: { select: { id: true, name: true } },
+        },
+      });
+      return NextResponse.json(updated);
     }
 
     const updateData: Record<string, unknown> = {};

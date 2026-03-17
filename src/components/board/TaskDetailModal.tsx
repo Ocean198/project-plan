@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { BoardTask } from "@/types/board";
+import type { BoardTask, LocationInfo } from "@/types/board";
 import { can, type RolePermissions } from "@/lib/permissions";
 
 interface ActivityEntry {
@@ -17,6 +17,8 @@ const ACTION_LABELS: Record<string, string> = {
   task_moved: "Aufgabe verschoben",
   task_completed: "Aufgabe abgeschlossen",
   task_priority_changed: "Priorität geändert",
+  task_location_changed: "Standort geändert",
+  task_commented: "Kommentar",
   cascade_triggered: "Cascade ausgelöst",
 };
 
@@ -36,12 +38,14 @@ interface TaskDetailModalProps {
   task: BoardTask;
   userRole: string;
   permissions: RolePermissions;
+  locations: LocationInfo[];
   onClose: () => void;
   onStatusChange: (taskId: number, status: "open" | "in_progress" | "completed") => Promise<void>;
   onDelete?: (taskId: number) => Promise<void>;
+  onTaskUpdated?: (taskId: number) => void;
 }
 
-export function TaskDetailModal({ task, userRole, permissions, onClose, onStatusChange, onDelete }: TaskDetailModalProps) {
+export function TaskDetailModal({ task, userRole, permissions, locations, onClose, onStatusChange, onDelete, onTaskUpdated }: TaskDetailModalProps) {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [changingStatus, setChangingStatus] = useState(false);
@@ -50,29 +54,36 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
   const [deleting, setDeleting] = useState(false);
   const [currentActionPoints, setCurrentActionPoints] = useState(task.action_points);
   const [savingSP, setSavingSP] = useState(false);
+  const [currentLocationId, setCurrentLocationId] = useState(task.location.id);
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [comment, setComment] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   const isCompleted = currentStatus === "completed";
   const isHardLocked = task.sprint.lock_status === "hard_locked";
   const canEdit = can(userRole, 'board.change_status', permissions) && !isCompleted;
   const canEditSP = can(userRole, 'board.edit_story_points', permissions) && !isCompleted && !isHardLocked;
+  const canChangeLocation = can(userRole, 'board.change_location', permissions) && !isCompleted && !isHardLocked;
+
+  async function loadActivities() {
+    setLoadingActivities(true);
+    try {
+      const res = await fetch(`/api/activity?target_type=task&limit=20`);
+      if (res.ok) {
+        const data = await res.json();
+        const taskActivities = data.logs.filter(
+          (l: ActivityEntry & { target_id: number }) => l.target_id === task.id
+        );
+        setActivities(taskActivities);
+      }
+    } finally {
+      setLoadingActivities(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadActivities() {
-      setLoadingActivities(true);
-      try {
-        const res = await fetch(`/api/activity?target_type=task&limit=10`);
-        if (res.ok) {
-          const data = await res.json();
-          const taskActivities = data.logs.filter(
-            (l: ActivityEntry & { target_id: number }) => l.target_id === task.id
-          );
-          setActivities(taskActivities);
-        }
-      } finally {
-        setLoadingActivities(false);
-      }
-    }
     loadActivities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task.id]);
 
   async function handleStatusChange(status: "open" | "in_progress" | "completed") {
@@ -101,6 +112,43 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
     }
   }
 
+  async function handleLocationChange(newLocationId: number) {
+    if (!canChangeLocation || savingLocation) return;
+    setSavingLocation(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location_id: newLocationId }),
+      });
+      if (res.ok) {
+        setCurrentLocationId(newLocationId);
+        onTaskUpdated?.(task.id);
+        await loadActivities();
+      }
+    } finally {
+      setSavingLocation(false);
+    }
+  }
+
+  async function handleCommentSubmit() {
+    if (!comment.trim() || submittingComment) return;
+    setSubmittingComment(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: comment.trim() }),
+      });
+      if (res.ok) {
+        setComment("");
+        await loadActivities();
+      }
+    } finally {
+      setSubmittingComment(false);
+    }
+  }
+
   async function handleDelete() {
     if (!onDelete || deleting) return;
     setDeleting(true);
@@ -119,13 +167,15 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
     });
   }
 
+  const currentLocation = locations.find((l) => l.id === currentLocationId) ?? task.location;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Farbstreifen oben */}
-        <div className="h-1.5 rounded-t-2xl" style={{ backgroundColor: task.location.color }} />
+        <div className="h-1.5 rounded-t-2xl" style={{ backgroundColor: currentLocation.color }} />
 
         {/* Header */}
         <div className="px-6 py-5">
@@ -137,9 +187,9 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <span
                   className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
-                  style={{ backgroundColor: task.location.color }}
+                  style={{ backgroundColor: currentLocation.color }}
                 >
-                  {task.location.name}
+                  {currentLocation.name}
                 </span>
                 <span className="text-xs text-gray-400">{task.sprint.label}</span>
                 {task.external_ticket_id && (
@@ -188,6 +238,26 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
             </span>
           </div>
 
+          {/* Standort ändern */}
+          {canChangeLocation && locations.length > 1 && (
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Standort</p>
+              <div className="flex items-center gap-2">
+                <select
+                  value={currentLocationId}
+                  onChange={(e) => handleLocationChange(parseInt(e.target.value))}
+                  disabled={savingLocation}
+                  className="text-sm px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 cursor-pointer bg-white"
+                >
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+                {savingLocation && <span className="text-xs text-gray-400">Speichern...</span>}
+              </div>
+            </div>
+          )}
+
           {/* Beschreibung */}
           {task.description && (
             <div>
@@ -214,7 +284,7 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
             )}
           </div>
 
-          {/* Status ändern (nur für berechtigte User, nicht hard-locked, nicht abgeschlossen) */}
+          {/* Status ändern */}
           {canEdit && !isHardLocked && (
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Status ändern</p>
@@ -245,7 +315,6 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
             <div>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Admin-Aktion</p>
               <div className="flex flex-col gap-2">
-                {/* Abgeschlossene Aufgabe wieder öffnen */}
                 {can(userRole, 'board.reopen_tasks', permissions) && isCompleted && (
                   <button
                     onClick={async () => {
@@ -269,7 +338,6 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
                   </button>
                 )}
 
-                {/* Aufgabe löschen */}
                 {can(userRole, 'board.delete_tasks', permissions) && !deleteConfirm ? (
                   <button
                     onClick={() => setDeleteConfirm(true)}
@@ -306,6 +374,25 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
             </div>
           )}
 
+          {/* Kommentar schreiben */}
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Kommentar hinzufügen</p>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Kommentar eingeben..."
+              rows={3}
+              className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-300"
+            />
+            <button
+              onClick={handleCommentSubmit}
+              disabled={!comment.trim() || submittingComment}
+              className="mt-1.5 px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {submittingComment ? "Speichern..." : "Kommentar speichern"}
+            </button>
+          </div>
+
           {/* Mini-Aktivitätslog */}
           <div>
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Aktivität</p>
@@ -332,6 +419,11 @@ export function TaskDetailModal({ task, userRole, permissions, onClose, onStatus
                       <span className="text-gray-500">
                         {ACTION_LABELS[entry.action] ?? entry.action}
                       </span>
+                      {entry.action === "task_commented" && typeof entry.details?.comment === "string" && (
+                        <p className="text-gray-600 mt-0.5 text-[11px] bg-gray-50 rounded px-2 py-1 whitespace-pre-wrap">
+                          {entry.details.comment}
+                        </p>
+                      )}
                       <p className="text-gray-400 text-[11px] mt-0.5">{formatDate(entry.created_at)}</p>
                     </div>
                   </div>

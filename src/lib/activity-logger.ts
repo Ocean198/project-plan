@@ -61,6 +61,22 @@ export async function logTaskPriorityChanged(
   await logActivity({ userId, action: "task_priority_changed", targetType: "task", targetId: taskId, details });
 }
 
+export async function logTaskLocationChanged(
+  userId: number,
+  taskId: number,
+  details: { old_location_id: number; new_location_id: number; old_location_name: string; new_location_name: string }
+) {
+  await logActivity({ userId, action: "task_location_changed", targetType: "task", targetId: taskId, details });
+}
+
+export async function logTaskCommented(
+  userId: number,
+  taskId: number,
+  details: { comment: string }
+) {
+  await logActivity({ userId, action: "task_commented", targetType: "task", targetId: taskId, details });
+}
+
 export async function logCascadeTriggered(
   userId: number,
   taskId: number,

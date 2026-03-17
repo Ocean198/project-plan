@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ressourcify – Benutzerhandbuch</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #2563EB;
+      --blue-light:  #EFF6FF;
+      --blue-mid:    #BFDBFE;
+      --gray-900:    #111827;
+      --gray-700:    #374151;
+      --gray-500:    #6B7280;
+      --gray-300:    #D1D5DB;
+      --gray-100:    #F3F4F6;
+      --gray-50:     #F9FAFB;
+      --green:       #16A34A;
+      --green-light: #DCFCE7;
+      --amber:       #D97706;
+      --amber-light: #FEF3C7;
+      --red:         #DC2626;
+      --red-light:   #FEE2E2;
+      --sidebar-w:   260px;
+      --header-h:    64px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--gray-700);
+      background: #fff;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: #fff;
+      border-bottom: 1px solid var(--gray-300);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 12px;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: -0.5px;
+    }
+    .logo-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--blue-light);
+      color: var(--blue);
+      border-radius: 99px;
+      padding: 2px 10px;
+    }
+    .header-right {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    /* ── SIDEBAR ── */
+    nav {
+      position: fixed;
+      top: var(--header-h);
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      overflow-y: auto;
+      border-right: 1px solid var(--gray-100);
+      padding: 24px 16px;
+      background: var(--gray-50);
+    }
+    nav .nav-group { margin-bottom: 24px; }
+    nav .nav-group-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+      padding-left: 8px;
+    }
+    nav a {
+      display: block;
+      padding: 7px 12px;
+      border-radius: 8px;
+      color: var(--gray-700);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: background 0.15s;
+    }
+    nav a:hover { background: var(--gray-100); }
+    nav a.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+
+    /* ── MAIN ── */
+    main {
+      margin-left: var(--sidebar-w);
+      margin-top: var(--header-h);
+      padding: 48px 56px 80px;
+      max-width: 900px;
+    }
+
+    /* ── TYPOGRAPHY ── */
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--gray-900);
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 56px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+    p { margin-bottom: 12px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    strong { color: var(--gray-900); font-weight: 600; }
+    code {
+      font-family: "SF Mono", ui-monospace, monospace;
+      font-size: 12.5px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--gray-700);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--blue) 0%, #3B82F6 100%);
+      border-radius: 16px;
+      padding: 40px 40px 36px;
+      color: #fff;
+      margin-bottom: 48px;
+    }
+    .hero h1 { color: #fff; margin-bottom: 6px; }
+    .hero p { color: rgba(255,255,255,0.85); font-size: 16px; margin-bottom: 0; }
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hero-chip {
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.2);
+      border-radius: 99px;
+      padding: 4px 14px;
+      color: #fff;
+    }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; margin-bottom: 2px; font-size: 13.5px; }
+    .callout-body p { margin-bottom: 0; font-size: 13.5px; }
+    .callout.info    { background: var(--blue-light);  border-left: 3px solid var(--blue); }
+    .callout.tip     { background: var(--green-light); border-left: 3px solid var(--green); }
+    .callout.warning { background: var(--amber-light); border-left: 3px solid var(--amber); }
+    .callout.sales-only {
+      background: #F5F3FF;
+      border-left: 3px solid #7C3AED;
+    }
+    .callout.viewer-only {
+      background: var(--gray-100);
+      border-left: 3px solid var(--gray-500);
+    }
+
+    /* ── ROLE BADGES ── */
+    .role {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 99px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+    .role.sales   { background: #EDE9FE; color: #5B21B6; }
+    .role.viewer  { background: var(--gray-100); color: var(--gray-500); }
+    .role.both    { background: var(--blue-light); color: var(--blue); }
+
+    /* ── PERMISSION TABLE ── */
+    .perm-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13.5px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .perm-table th {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .perm-table th:not(:first-child) { text-align: center; }
+    .perm-table td {
+      padding: 9px 14px;
+      border-top: 1px solid var(--gray-100);
+      color: var(--gray-700);
+    }
+    .perm-table td:not(:first-child) { text-align: center; }
+    .perm-table tr:nth-child(even) td { background: var(--gray-50); }
+    .check { color: var(--green); font-size: 16px; }
+    .cross { color: var(--gray-300); font-size: 16px; }
+
+    /* ── STATUS BADGES ── */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .status.open       { background: var(--gray-100); color: var(--gray-700); }
+    .status.inprogress { background: #DBEAFE; color: #1E40AF; }
+    .status.done       { background: var(--green-light); color: #166534; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .status.open .status-dot       { background: var(--gray-500); }
+    .status.inprogress .status-dot { background: var(--blue); }
+    .status.done .status-dot       { background: var(--green); }
+
+    /* ── LOCK BADGES ── */
+    .lock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-right: 6px;
+    }
+    .lock-badge.open   { background: var(--gray-100); color: var(--gray-500); }
+    .lock-badge.soft   { background: #FEF3C7; color: #92400E; }
+    .lock-badge.hard   { background: var(--red-light); color: var(--red); }
+
+    /* ── SP BADGES ── */
+    .sp-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-right: 4px;
+    }
+    .sp-badge.low  { background: var(--green-light); color: #166534; }
+    .sp-badge.mid  { background: var(--amber-light); color: #78350F; }
+    .sp-badge.high { background: var(--red-light); color: var(--red); }
+
+    /* ── CAPACITY BAR ── */
+    .cap-demo {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .cap-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cap-row:last-child { margin-bottom: 0; }
+    .cap-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .cap-name { font-size: 12.5px; color: var(--gray-500); min-width: 70px; }
+    .cap-bar-wrap { flex: 1; height: 6px; background: var(--gray-100); border-radius: 99px; overflow: hidden; }
+    .cap-bar { height: 100%; border-radius: 99px; }
+    .cap-label { font-size: 12px; font-weight: 600; color: var(--gray-500); white-space: nowrap; }
+
+    /* ── STEPS ── */
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* ── TWO-COL ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+    .card p, .card li { font-size: 13.5px; color: var(--gray-500); margin-bottom: 6px; }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--gray-100); margin: 32px 0; }
+
+    /* ── PRINT ── */
+    @media print {
+      nav, header { display: none; }
+      main { margin: 0; padding: 24px; max-width: 100%; }
+      .hero { background: var(--blue) !important; -webkit-print-color-adjust: exact; }
+      h2 { page-break-before: always; }
+    }
+
+    @media (max-width: 768px) {
+      nav { display: none; }
+      main { margin-left: 0; padding: 24px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <span class="logo">ressourcify</span>
+  <span class="logo-badge">Benutzerhandbuch</span>
+  <span class="header-right">Version 1.0 &nbsp;·&nbsp; März 2026</span>
+</header>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="nav-group">
+    <div class="nav-group-title">Einstieg</div>
+    <a href="#einstieg">Willkommen</a>
+    <a href="#rollen">Deine Rolle</a>
+    <a href="#navigation">Navigation</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Das Board</div>
+    <a href="#board">Übersicht</a>
+    <a href="#kapazitaet">Kapazitätsanzeige</a>
+    <a href="#tasks">Task-Karten</a>
+    <a href="#filter">Filtern</a>
+    <a href="#sperren">Sprint-Sperren</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Tasks bearbeiten</div>
+    <a href="#detail">Task-Detail</a>
+    <a href="#status">Status ändern</a>
+    <a href="#sp">Story Points</a>
+    <a href="#verschieben">Tasks verschieben</a>
+    <a href="#cascade">Cascade</a>
+    <a href="#rueckgaengig">Rückgängig</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Weitere Seiten</div>
+    <a href="#liste">Liste</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#aktivitaet">Aktivität</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Sonstiges</div>
+    <a href="#benachrichtigungen">Benachrichtigungen</a>
+    <a href="#export">Export</a>
+    <a href="#faq">Häufige Fragen</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>ressourcify</h1>
+    <p>Standortübergreifende Sprint-Planung – einfach erklärt.</p>
+    <div class="hero-meta">
+      <span class="hero-chip">Für Viewer &amp; Sales</span>
+      <span class="hero-chip">Deutsch</span>
+      <span class="hero-chip">Version 1.0</span>
+    </div>
+  </section>
+
+  <!-- ═══ EINSTIEG ═══ -->
+  <h2 id="einstieg">Willkommen bei ressourcify</h2>
+  <p>
+    <strong>ressourcify</strong> hilft deinem Team dabei, Aufgaben (Tasks) über mehrere
+    Standorte und Sprints hinweg zu planen und zu verwalten. Jeder Standort hat ein
+    eigenes Story-Points-Budget pro Sprint. Wenn ein Sprint voll ist, sorgt die
+    automatische <strong>Cascade-Logik</strong> dafür, dass Aufgaben geordnet in den
+    nächsten Sprint weiterlaufen – ohne dass du selbst umräumen musst.
+  </p>
+  <p>
+    Dieses Handbuch richtet sich an Nutzer mit den Rollen <strong>Viewer</strong> und
+    <strong>Sales</strong>. Admin-Funktionen (Benutzer verwalten, Standorte anlegen etc.)
+    werden hier nicht behandelt.
+  </p>
+
+  <div class="callout info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body">
+      <strong>Noch nicht eingeloggt?</strong>
+      <p>Öffne die App-URL in deinem Browser und melde dich mit E-Mail-Adresse und Passwort an. Wende dich bei Fragen zu deinen Zugangsdaten an deinen Administrator.</p>
+    </div>
+  </div>
+
+  <!-- ═══ ROLLEN ═══ -->
+  <h2 id="rollen">Deine Rolle – was kannst du tun?</h2>
+  <p>
+    Jeder Nutzer hat eine Rolle, die bestimmt, welche Aktionen erlaubt sind.
+    Deine Rolle siehst du in der Seitenleiste links unten (unter deinem Namen).
+  </p>
+
+  <table class="perm-table">
+    <thead>
+      <tr>
+        <th>Funktion</th>
+        <th>Viewer</th>
+        <th>Sales</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Board, Liste, Dashboard, Aktivität ansehen</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Tasks und Details öffnen</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Story Points (SP) bearbeiten</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Task-Status ändern (Offen → In Bearbeitung → Abgeschlossen)</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Tasks per Drag &amp; Drop verschieben</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>CSV- &amp; PDF-Export</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td>Tasks löschen / wiedereröffnen</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="cross">—</span></td>
+      </tr>
+      <tr>
+        <td>Sprint-Sperren ändern / Admin-Bereich</td>
+        <td><span class="cross">—</span></td>
+        <td><span class="cross">—</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout sales-only">
+    <span class="callout-icon">🟣</span>
+    <div class="callout-body">
+      <strong>Sales-Hinweis in diesem Handbuch</strong>
+      <p>Abschnitte und Boxen mit diesem lila Rand beschreiben Funktionen, die nur für Sales-Nutzer verfügbar sind.</p>
+    </div>
+  </div>
+
+  <!-- ═══ NAVIGATION ═══ -->
+  <h2 id="navigation">Navigation</h2>
+  <p>
+    Die Seitenleiste ist immer links sichtbar und kann durch Klick auf das
+    Pfeil-Symbol ein- und ausgeklappt werden.
+  </p>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>📋 Board</h4>
+      <p>Hauptansicht: alle Sprints als Kanban-Spalten nebeneinander. Hier planst und verschiebst du Aufgaben.</p>
+    </div>
+    <div class="card">
+      <h4>📊 Dashboard</h4>
+      <p>Übersicht: Kapazitätsauslastung, Velocity-Diagramm, Warnhinweise bei überbuchten Sprints.</p>
+    </div>
+    <div class="card">
+      <h4>≡ Liste</h4>
+      <p>Tabellenansicht aller Tasks mit Suche, Filtern und Sortierung. Ideal für schnelles Suchen.</p>
+    </div>
+    <div class="card">
+      <h4>🕐 Aktivität</h4>
+      <p>Chronologisches Protokoll aller Änderungen im System – wer hat wann was gemacht.</p>
+    </div>
+  </div>
+
+  <p>
+    Dein Name und deine Rolle sind unten in der Seitenleiste sichtbar. Dort findest
+    du auch den <strong>Abmelden</strong>-Button.
+  </p>
+
+  <!-- ═══ BOARD ═══ -->
+  <h2 id="board">Das Board – Überblick</h2>
+  <p>
+    Das Board ist die zentrale Arbeitsfläche von ressourcify. Es zeigt alle aktiven
+    Sprints als horizontale Spalten. Du kannst das Board <strong>horizontal scrollen</strong>,
+    um ältere oder zukünftige Sprints zu sehen.
+  </p>
+
+  <p><strong>Aufbau einer Sprint-Spalte (von oben nach unten):</strong></p>
+  <ol>
+    <li><strong>Sprint-Bezeichnung</strong> (z.&thinsp;B. „April 2026") und Aufgabenanzahl</li>
+    <li><strong>Sprint-Sperrstatus</strong> (kleines Schloss-Symbol)</li>
+    <li><strong>Kapazitätsbalken</strong> pro Standort</li>
+    <li><strong>Task-Karten</strong> in Prioritätsreihenfolge (oben = höchste Priorität)</li>
+  </ol>
+
+  <div class="callout info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-body">
+      <strong>Sortierung = Priorität</strong>
+      <p>Tasks sind innerhalb jeder Spalte nach Priorität sortiert. Oben stehen die wichtigsten Aufgaben. Die Reihenfolge wird beim Verschieben automatisch angepasst.</p>
+    </div>
+  </div>
+
+  <!-- ═══ KAPAZITÄT ═══ -->
+  <h2 id="kapazitaet">Kapazitätsanzeige</h2>
+  <p>
+    Unter der Sprint-Überschrift findest du für jeden Standort einen kleinen
+    <strong>Kapazitätsbalken</strong>. Er zeigt, wie viele Story Points (SP) bereits
+    verplant sind im Verhältnis zum Budget.
+  </p>
+
+  <div class="cap-demo">
+    <div class="cap-row">
+      <div class="cap-dot" style="background:#3B82F6"></div>
+      <span class="cap-name">Berlin</span>
+      <div class="cap-bar-wrap"><div class="cap-bar" style="width:56%;background:#22C55E"></div></div>
+      <span class="cap-label">28 / 50</span>
+    </div>
+    <div class="cap-row">
+      <div class="cap-dot" style="background:#EF4444"></div>
+      <span class="cap-name">München</span>
+      <div class="cap-bar-wrap"><div class="cap-bar" style="width:82%;background:#EAB308"></div></div>
+      <span class="cap-label">37 / 45</span>
+    </div>
+    <div class="cap-row">
+      <div class="cap-dot" style="background:#10B981"></div>
+      <span class="cap-name">Hamburg</span>
+      <div class="cap-bar-wrap"><div class="cap-bar" style="width:100%;background:#EF4444"></div></div>
+      <span class="cap-label" style="color:#DC2626">42 / 40</span>
+    </div>
+  </div>
+
+  <p><strong>Bedeutung der Farben:</strong></p>
+  <ul>
+    <li><span style="color:#22C55E;font-weight:700;">●</span> <strong>Grün</strong> – unter 70 % belegt, noch viel Puffer</li>
+    <li><span style="color:#EAB308;font-weight:700;">●</span> <strong>Gelb</strong> – 70–89 % belegt, knapp werdend</li>
+    <li><span style="color:#F97316;font-weight:700;">●</span> <strong>Orange</strong> – 90–99 % belegt, fast voll</li>
+    <li><span style="color:#EF4444;font-weight:700;">●</span> <strong>Rot</strong> – 100 % oder mehr, Sprint überbucht</li>
+  </ul>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Überbucht ist kein Fehler</strong>
+      <p>Ein roter Balken zeigt Überbuchung an, verhindert das Arbeiten aber nicht. Wurde der Sprint zuletzt verändert (Cascade), kann sich die Anzeige noch angleichen.</p>
+    </div>
+  </div>
+
+  <!-- ═══ TASKS ═══ -->
+  <h2 id="tasks">Task-Karten</h2>
+  <p>Jede Aufgabe wird als Karte im Board dargestellt. Die Karte enthält:</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>Linke Leiste (Standortfarbe)</h4>
+      <p>Der farbige vertikale Streifen links auf der Karte zeigt den Standort der Aufgabe an.</p>
+    </div>
+    <div class="card">
+      <h4>Standort-Chip</h4>
+      <p>Farbiges Label mit dem Standortnamen (z.&thinsp;B. „Berlin").</p>
+    </div>
+    <div class="card">
+      <h4>Story Points (SP)</h4>
+      <p>
+        <span class="sp-badge low">2 SP</span> grün (1–3 SP)<br>
+        <span class="sp-badge mid">5 SP</span> gelb (4–6 SP)<br>
+        <span class="sp-badge high">8 SP</span> rot (7–10 SP)
+      </p>
+    </div>
+    <div class="card">
+      <h4>Status-Badge</h4>
+      <p>
+        <span class="status open"><span class="status-dot"></span>Offen</span>&nbsp;
+        <span class="status inprogress"><span class="status-dot"></span>In Bearbeitung</span>&nbsp;
+        <span class="status done"><span class="status-dot"></span>Abgeschlossen</span>
+      </p>
+    </div>
+  </div>
+
+  <p>
+    Abgeschlossene Tasks werden <span style="opacity:0.5;text-decoration:line-through">durchgestrichen und leicht ausgegraut</span> dargestellt.
+    Tasks „In Bearbeitung" haben einen blauen Rahmen.
+  </p>
+
+  <!-- ═══ FILTER ═══ -->
+  <h2 id="filter">Filtern</h2>
+  <p>
+    Oberhalb des Boards findest du die <strong>Filterleiste</strong>. Damit blendest
+    du gezielt Tasks aus, die dich gerade nicht interessieren.
+  </p>
+
+  <h3>Standort-Filter</h3>
+  <p>
+    Klicke auf einen oder mehrere farbige Standort-Chips, um nur Tasks dieses
+    Standorts anzuzeigen. Aktive Filter erscheinen mit farbigem Hintergrund.
+  </p>
+
+  <h3>Status-Filter</h3>
+  <p>
+    Filtere nach <strong>Offen</strong>, <strong>In Bearbeitung</strong> oder
+    <strong>Abgeschlossen</strong>. Mehrere Status können gleichzeitig aktiv sein.
+  </p>
+
+  <div class="callout tip">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body">
+      <strong>Filter zurücksetzen</strong>
+      <p>Sobald ein Filter aktiv ist, erscheint der Link „Filter zurücksetzen" in der Leiste. Ein Klick entfernt alle Filter auf einmal.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SPERREN ═══ -->
+  <h2 id="sperren">Sprint-Sperrstatus</h2>
+  <p>
+    Jeder Sprint hat einen Sperrstatus, der oben in der Sprint-Spalte als kleines
+    Schloss-Symbol angezeigt wird. Sperren können nur von Admins geändert werden –
+    als normaler Nutzer siehst du den Status nur.
+  </p>
+
+  <p>
+    <span class="lock-badge open">🔓 Offen</span>
+    Tasks können verschoben und bearbeitet werden.
+  </p>
+  <p>
+    <span class="lock-badge soft">🔒 Soft-gesperrt</span>
+    Warnsignal. Tasks können trotzdem noch verschoben werden.
+  </p>
+  <p>
+    <span class="lock-badge hard">🔒 Hard-gesperrt</span>
+    Sprint ist eingefroren. Drag &amp; Drop in/aus diesem Sprint ist nicht mehr möglich.
+    Die gesamte Spalte wird abgedunkelt dargestellt.
+  </p>
+
+  <!-- ═══ DETAIL ═══ -->
+  <h2 id="detail">Task-Detail öffnen</h2>
+  <p>
+    Ein Klick auf eine beliebige Task-Karte öffnet das <strong>Detail-Fenster</strong>
+    (Modal). Dort siehst du alle Informationen zu dieser Aufgabe.
+  </p>
+
+  <ul>
+    <li><strong>Titel</strong> und Standort (als farbiger Chip)</li>
+    <li><strong>Sprint</strong>, in dem die Aufgabe liegt</li>
+    <li><strong>Externe Ticket-ID</strong> (z.&thinsp;B. aus Pipedrive oder Jira), falls vorhanden</li>
+    <li><strong>Story Points</strong> (editierbar – siehe unten)</li>
+    <li><strong>Status</strong> (ggf. änderbar – Sales only)</li>
+    <li><strong>Beschreibung</strong> (Freitext, falls hinterlegt)</li>
+    <li><strong>Erstellt von</strong> und <strong>Erstellungsdatum</strong></li>
+    <li><strong>Abschlussdatum</strong> (nur wenn abgeschlossen)</li>
+    <li><strong>Aktivitäts-Log</strong> (letzte 10 Ereignisse zu diesem Task)</li>
+  </ul>
+
+  <p>Das Fenster schließt du mit dem <strong>×</strong>-Button oben rechts oder einem Klick daneben.</p>
+
+  <!-- ═══ STATUS ═══ -->
+  <h2 id="status">Status ändern <span class="role sales">nur Sales</span></h2>
+
+  <div class="callout sales-only">
+    <span class="callout-icon">🟣</span>
+    <div class="callout-body">
+      <strong>Sales-Funktion</strong>
+      <p>Nur Nutzer mit der Rolle „Sales" können den Status eines Tasks ändern.</p>
+    </div>
+  </div>
+
+  <p>
+    Im Task-Detail-Fenster findest du unten drei Schaltflächen:
+  </p>
+
+  <ol class="steps">
+    <li>Klicke auf die gewünschte Schaltfläche: <strong>Offen</strong>, <strong>In Bearbeitung</strong> oder <strong>Abgeschlossen</strong>.</li>
+    <li>Die aktive Schaltfläche wird farblich hervorgehoben.</li>
+    <li>Nach dem Speichern schließt das Fenster automatisch.</li>
+  </ol>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Abgeschlossene Tasks sind gesperrt</strong>
+      <p>Sobald ein Task auf „Abgeschlossen" gesetzt wird, können Status und SP nicht mehr geändert werden. Nur ein Administrator kann ihn wiedereröffnen.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">🔒</span>
+    <div class="callout-body">
+      <strong>Hard-gesperrte Sprints</strong>
+      <p>In hard-gesperrten Sprints sind die Status-Schaltflächen ausgeblendet. Tasks können dort nicht mehr bearbeitet werden.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SP ═══ -->
+  <h2 id="sp">Story Points bearbeiten</h2>
+  <p>
+    Story Points (SP) geben an, wie aufwändig ein Task ist. Die Skala reicht von
+    <strong>1 SP</strong> (minimal) bis <strong>10 SP</strong> (sehr aufwändig).
+    SP beeinflussen direkt die Kapazitätsauslastung eines Sprints.
+  </p>
+
+  <div class="callout info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body">
+      <strong>Viewer können SP bearbeiten</strong>
+      <p>Im Gegensatz zu anderen Aktionen können auch Nutzer mit der Rolle „Viewer" Story Points ändern. Die Änderung wird sofort gespeichert.</p>
+    </div>
+  </div>
+
+  <h3>So änderst du SP:</h3>
+  <ol class="steps">
+    <li>Öffne den Task per Klick auf die Karte.</li>
+    <li>Im Detail-Fenster siehst du neben „Story Points" ein Dropdown-Menü.</li>
+    <li>Wähle den neuen Wert (1–10). Die Änderung wird sofort gespeichert.</li>
+  </ol>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>SP-Änderung beeinflusst Kapazität</strong>
+      <p>Wenn du SP erhöhst und der Sprint dadurch voll wird, kann das eine Cascade auslösen. Reduzierst du SP, wird ggf. ein Task aus dem nächsten Sprint automatisch vorgezogen.</p>
+    </div>
+  </div>
+
+  <!-- ═══ VERSCHIEBEN ═══ -->
+  <h2 id="verschieben">Tasks verschieben <span class="role sales">nur Sales</span></h2>
+
+  <div class="callout sales-only">
+    <span class="callout-icon">🟣</span>
+    <div class="callout-body">
+      <strong>Sales-Funktion</strong>
+      <p>Nur Nutzer mit der Rolle „Sales" können Tasks per Drag &amp; Drop verschieben.</p>
+    </div>
+  </div>
+
+  <p>
+    Tasks lassen sich per <strong>Drag &amp; Drop</strong> innerhalb eines Sprints
+    (Priorität ändern) oder in einen anderen Sprint verschieben.
+  </p>
+
+  <h3>Innerhalb eines Sprints (Priorität ändern)</h3>
+  <ol class="steps">
+    <li>Halte den Task gedrückt und ziehe ihn an die gewünschte Position.</li>
+    <li>Ein blau gestrichelter Platzhalter zeigt, wo der Task landet.</li>
+    <li>Lasse los – die Priorität wird automatisch neu berechnet.</li>
+  </ol>
+
+  <h3>In einen anderen Sprint verschieben</h3>
+  <ol class="steps">
+    <li>Ziehe den Task in eine andere Sprint-Spalte.</li>
+    <li>Falls der Task dort passt (Kapazität reicht): er landet sofort, eine Erfolgsmeldung erscheint unten rechts.</li>
+    <li>Falls der Sprint dadurch voll wird: Es öffnet sich der <strong>Cascade-Dialog</strong> (siehe nächster Abschnitt).</li>
+  </ol>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Tasks „In Bearbeitung" können nicht gezogen werden</strong>
+      <p>Tasks mit Status „In Bearbeitung" sind fixiert. Um sie zu verschieben, setze den Status zuerst auf „Offen".</p>
+    </div>
+  </div>
+
+  <!-- ═══ CASCADE ═══ -->
+  <h2 id="cascade">Cascade – automatisches Weiterrutschen</h2>
+  <p>
+    Wenn du einen Task in einen Sprint verschiebst und die Kapazität für diesen
+    Standort dadurch überschritten wird, greift die <strong>Cascade-Logik</strong>:
+    Der Task mit der <em>niedrigsten Priorität</em> aus dem betroffenen Sprint wird
+    automatisch in den nächsten Sprint weitergeleitet.
+  </p>
+
+  <div class="callout info">
+    <span class="callout-icon">🔄</span>
+    <div class="callout-body">
+      <strong>Cascade kann mehrere Sprints betreffen</strong>
+      <p>Ist auch der nächste Sprint voll, rutscht der verdrängte Task weiter – und so fort. Falls nötig, legt das System automatisch einen neuen Sprint an.</p>
+    </div>
+  </div>
+
+  <h3>Was passiert im Cascade-Dialog?</h3>
+  <ol class="steps">
+    <li>Ein Dialog öffnet sich und zeigt dir, welche Tasks verschoben werden würden.</li>
+    <li>Du siehst die Anzahl betroffener Tasks, die Ziel-Sprints und ob neue Sprints angelegt werden müssen.</li>
+    <li>Über <strong>„Details anzeigen"</strong> kannst du die vollständige Liste aufklappen.</li>
+    <li>Klicke auf <strong>„Verschieben &amp; Cascade bestätigen"</strong> um fortzufahren oder auf <strong>„Abbrechen"</strong>.</li>
+  </ol>
+
+  <div class="callout tip">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body">
+      <strong>Verdrängte Tasks kommen nach oben</strong>
+      <p>Tasks die durch eine Cascade in den nächsten Sprint rutschen, werden dort ganz oben einsortiert – damit sie als erstes erledigt werden.</p>
+    </div>
+  </div>
+
+  <!-- ═══ RÜCKGÄNGIG ═══ -->
+  <h2 id="rueckgaengig">Verschieben rückgängig machen <span class="role sales">nur Sales</span></h2>
+  <p>
+    Nach jedem erfolgreichen Verschieben erscheint unten rechts eine
+    <strong>Toast-Meldung</strong> mit einem <strong>„Rückgängig"</strong>-Button.
+  </p>
+
+  <ol class="steps">
+    <li>Die Meldung erscheint nach dem Verschieben für einige Sekunden.</li>
+    <li>Klicke auf <strong>„Rückgängig"</strong>, um den Task wieder in den ursprünglichen Sprint zurückzusetzen.</li>
+    <li>Die Meldung verschwindet automatisch – danach ist kein Rückgängig mehr möglich.</li>
+  </ol>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Rückgängig gilt nur für die letzte Aktion</strong>
+      <p>Nur der zuletzt verschobene Task kann rückgängig gemacht werden. Sobald du einen weiteren Task verschiebst oder das Fenster neu lädst, ist diese Option weg.</p>
+    </div>
+  </div>
+
+  <!-- ═══ LISTE ═══ -->
+  <h2 id="liste">Die Listen-Ansicht</h2>
+  <p>
+    Die <strong>Listen-Seite</strong> zeigt alle Tasks in einer Tabelle. Sie eignet
+    sich besonders gut, wenn du nach einer bestimmten Aufgabe suchen oder schnell
+    filtern möchtest.
+  </p>
+
+  <h3>Suche</h3>
+  <p>Tippe in das Suchfeld, um Tasks nach Titel zu filtern. Die Suche reagiert sofort.</p>
+
+  <h3>Filter</h3>
+  <ul>
+    <li><strong>Status:</strong> Offen / In Bearbeitung / Abgeschlossen</li>
+    <li><strong>Standort:</strong> einzelne oder mehrere Standorte</li>
+    <li><strong>Sprint:</strong> einzelne oder mehrere Sprints</li>
+  </ul>
+
+  <h3>Sortierung</h3>
+  <p>
+    Klicke auf eine Spaltenüberschrift (z.&thinsp;B. „Sprint" oder „SP"), um danach
+    zu sortieren. Ein zweiter Klick kehrt die Richtung um.
+  </p>
+
+  <h3>Seitennavigation</h3>
+  <p>
+    Die Liste zeigt 25 Tasks pro Seite. Mit <strong>„&lt; Zurück"</strong> und
+    <strong>„Weiter &gt;"</strong> blätterst du durch die Seiten.
+  </p>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <h2 id="dashboard">Das Dashboard</h2>
+  <p>
+    Das Dashboard gibt dir einen schnellen Überblick über den aktuellen Stand aller
+    Sprints und Standorte.
+  </p>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>Offene Tasks</h4>
+      <p>Gesamtzahl aller Tasks mit Status „Offen" über alle Sprints.</p>
+    </div>
+    <div class="card">
+      <h4>Abgeschlossene Tasks</h4>
+      <p>Gesamtzahl aller erledigten Tasks.</p>
+    </div>
+    <div class="card">
+      <h4>Velocity (aktueller Monat)</h4>
+      <p>Wie viele Tasks wurden im laufenden Monat abgeschlossen.</p>
+    </div>
+    <div class="card">
+      <h4>Kapazitätsübersicht</h4>
+      <p>Auslastung aller Standorte im aktuellen Sprint als Übersicht.</p>
+    </div>
+  </div>
+
+  <h3>Sprint-Warnungen</h3>
+  <p>
+    Wenn ein Sprint für einen Standort überbucht ist, zeigt das Dashboard einen
+    roten Hinweis mit dem Überlaufbetrag. So erkennst du sofort, wo Handlungsbedarf besteht.
+  </p>
+
+  <!-- ═══ AKTIVITÄT ═══ -->
+  <h2 id="aktivitaet">Die Aktivitäts-Seite</h2>
+  <p>
+    Unter <strong>Aktivität</strong> findest du ein vollständiges, zeitlich
+    sortiertes Protokoll aller Änderungen – aufgeteilt nach Datum.
+  </p>
+
+  <p>Jeder Eintrag zeigt:</p>
+  <ul>
+    <li>Den <strong>Nutzer</strong>, der die Aktion durchgeführt hat</li>
+    <li>Die <strong>Aktion</strong> (z.&thinsp;B. „Aufgabe verschoben", „Cascade ausgelöst")</li>
+    <li>Relevante <strong>Details</strong> (z.&thinsp;B. „Sprint A → Sprint B" oder „3 SP")</li>
+    <li>Den <strong>Zeitpunkt</strong> (relativ, z.&thinsp;B. „vor 5 Min.")</li>
+  </ul>
+
+  <h3>Filtern nach Aktionstyp</h3>
+  <p>
+    Über das Dropdown kannst du auf bestimmte Aktionstypen einschränken
+    (z.&thinsp;B. nur „Aufgabe abgeschlossen").
+  </p>
+
+  <h3>Aktualisieren</h3>
+  <p>
+    Klicke auf <strong>„Aktualisieren"</strong>, um die Liste neu zu laden und
+    die neuesten Einträge zu sehen.
+  </p>
+
+  <!-- ═══ BENACHRICHTIGUNGEN ═══ -->
+  <h2 id="benachrichtigungen">Benachrichtigungen</h2>
+  <p>
+    Oben rechts in der App befindet sich das <strong>Glocken-Symbol</strong>. Eine
+    rote Zahl zeigt, wie viele ungelesene Benachrichtigungen vorliegen.
+  </p>
+
+  <h3>Benachrichtigungen öffnen</h3>
+  <ol class="steps">
+    <li>Klicke auf die Glocke, um das Benachrichtigungs-Panel zu öffnen.</li>
+    <li>Ungelesene Einträge erscheinen mit hellblauem Hintergrund und einem blauen Punkt.</li>
+    <li>Klicke auf den blauen Punkt, um eine Benachrichtigung als gelesen zu markieren.</li>
+    <li>Über <strong>„Alle als gelesen markieren"</strong> kannst du alles auf einmal quittieren.</li>
+    <li>Klicke irgendwo außerhalb des Panels, um es zu schließen.</li>
+  </ol>
+
+  <p>Benachrichtigungstypen (Auswahl):</p>
+  <ul>
+    <li><strong>🔄 Cascade ausgelöst</strong> – Tasks wurden automatisch in den nächsten Sprint verschoben</li>
+    <li><strong>🔒 Sprint gesperrt</strong> – ein Sprint wurde auf Hard-gesperrt gestellt</li>
+    <li><strong>📊 Kapazität geändert</strong> – ein SP-Budget wurde angepasst</li>
+    <li><strong>📥 Tasks importiert</strong> – neue Tasks wurden per CSV importiert</li>
+  </ul>
+
+  <!-- ═══ EXPORT ═══ -->
+  <h2 id="export">Export <span class="role sales">nur Sales</span></h2>
+
+  <div class="callout sales-only">
+    <span class="callout-icon">🟣</span>
+    <div class="callout-body">
+      <strong>Sales-Funktion</strong>
+      <p>CSV- und PDF-Export sind nur für Sales-Nutzer verfügbar.</p>
+    </div>
+  </div>
+
+  <p>
+    Auf der <strong>Listen-Seite</strong> und dem <strong>Dashboard</strong> findest
+    du Export-Schaltflächen:
+  </p>
+
+  <ul>
+    <li>
+      <strong>CSV-Export</strong> – Exportiert alle aktuell gefilterten Tasks als
+      CSV-Datei (kompatibel mit Excel, Google Sheets etc.).<br>
+      Dateiname: <code>sprintboard-export-JJJJ-MM-TT.csv</code>
+    </li>
+    <li>
+      <strong>PDF-Export</strong> – Erstellt einen formatierten Bericht als PDF,
+      geeignet für Meetings oder zur Ablage.
+    </li>
+  </ul>
+
+  <hr class="divider" />
+
+  <!-- ═══ FAQ ═══ -->
+  <h2 id="faq">Häufige Fragen</h2>
+
+  <h3>Ein Task ist verschwunden – wo ist er?</h3>
+  <p>
+    Wahrscheinlich wurde er durch eine Cascade in einen anderen Sprint verschoben.
+    Schaue auf der <strong>Listen-Seite</strong> nach – dort sind alle Tasks
+    suchbar und filterbar, unabhängig vom Sprint.
+  </p>
+
+  <h3>Warum kann ich den Status eines Tasks nicht ändern?</h3>
+  <p>Dafür kann es drei Gründe geben:</p>
+  <ul>
+    <li>Du hast die Rolle <strong>Viewer</strong> – Statusänderungen sind nur für Sales.</li>
+    <li>Der Task ist bereits <strong>abgeschlossen</strong>.</li>
+    <li>Der Sprint ist <strong>hard-gesperrt</strong>.</li>
+  </ul>
+
+  <h3>Warum kann ich den Task nicht verschieben?</h3>
+  <ul>
+    <li>Du hast die Rolle <strong>Viewer</strong> – Drag &amp; Drop ist nur für Sales.</li>
+    <li>Der Task hat den Status <strong>„In Bearbeitung"</strong> – setze ihn zuerst auf „Offen".</li>
+    <li>Der Ziel-Sprint ist <strong>hard-gesperrt</strong>.</li>
+  </ul>
+
+  <h3>Was bedeutet „Cascade"?</h3>
+  <p>
+    Wenn ein Sprint für einen Standort voll ist und du einen Task hineinziehst, muss
+    ein anderer Task Platz machen. Dieser wird automatisch in den nächsten Sprint
+    geschoben. Das nennt sich Cascade. Der verschobene Task landet dort ganz oben.
+  </p>
+
+  <h3>Kann ich SP ändern, wenn der Task abgeschlossen ist?</h3>
+  <p>Nein. Abgeschlossene Tasks sind gesperrt und können nicht mehr bearbeitet werden.</p>
+
+  <h3>Wo sehe ich, wer einen Task angelegt hat?</h3>
+  <p>
+    Im <strong>Task-Detail</strong> (Klick auf die Karte) unter dem Abschnitt
+    „Erstellt von". Alternativ findest du alle Ereignisse auf der
+    <strong>Aktivitäts-Seite</strong>.
+  </p>
+
+  <h3>Wie drucke ich dieses Handbuch?</h3>
+  <p>
+    Nutze im Browser <strong>Drucken</strong> (Strg+P / ⌘+P) oder
+    „Als PDF speichern". Das Layout ist druckoptimiert.
+  </p>
+
+  <hr class="divider" />
+  <p style="text-align:center;color:var(--gray-500);font-size:13px;">
+    ressourcify Benutzerhandbuch · Version 1.0 · März 2026
+  </p>
+
+</main>
+
+<!-- Active nav highlight on scroll -->
+<script>
+  const sections = document.querySelectorAll("h2[id], h3[id]");
+  const navLinks = document.querySelectorAll("nav a");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        navLinks.forEach((a) => {
+          a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: "-20% 0px -75% 0px" });
+
+  sections.forEach((s) => observer.observe(s));
+</script>
+
+</body>
+</html>
