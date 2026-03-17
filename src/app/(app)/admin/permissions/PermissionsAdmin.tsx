@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { PERMISSION_DEFS, DEFAULT_PERMISSIONS, type PermissionKey, type RolePermissions } from "@/lib/permissions";
 
 const CONFIGURABLE_ROLES = [
-  { key: "viewer", label: "User" },
-  { key: "sales", label: "Sales" },
+  { key: "viewer", label: "Specialist" },
+  { key: "sales", label: "Manager" },
 ];
 
 const GROUPS = ["Board", "Sprints", "Settings"] as const;

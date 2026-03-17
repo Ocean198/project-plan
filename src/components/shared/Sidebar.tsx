@@ -84,8 +84,8 @@ const navItems: NavItem[] = [
 ];
 
 const ROLE_DISPLAY_LABELS: Record<string, string> = {
-  viewer: "User",
-  sales: "Sales",
+  viewer: "Specialist",
+  sales: "Manager",
   admin: "Admin",
 };
 

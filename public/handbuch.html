@@ -427,7 +427,7 @@
     <h1>ressourcify</h1>
     <p>Standortübergreifende Sprint-Planung – einfach erklärt.</p>
     <div class="hero-meta">
-      <span class="hero-chip">Für Viewer &amp; Sales</span>
+      <span class="hero-chip">Für Specialist &amp; Manager</span>
       <span class="hero-chip">Deutsch</span>
       <span class="hero-chip">Version 1.1</span>
     </div>
@@ -443,8 +443,8 @@
     nächsten Sprint weiterlaufen – ohne dass du selbst umräumen musst.
   </p>
   <p>
-    Dieses Handbuch richtet sich an Nutzer mit den Rollen <strong>Viewer</strong> und
-    <strong>Sales</strong>. Admin-Funktionen (Benutzer verwalten, Standorte anlegen etc.)
+    Dieses Handbuch richtet sich an Nutzer mit den Rollen <strong>Specialist</strong> und
+    <strong>Manager</strong>. Admin-Funktionen (Benutzer verwalten, Standorte anlegen etc.)
     werden hier nicht behandelt.
   </p>
 
@@ -461,75 +461,19 @@
   <p>
     Jeder Nutzer hat eine Rolle, die bestimmt, welche Aktionen erlaubt sind.
     Deine Rolle siehst du in der Seitenleiste links unten (unter deinem Namen).
+    Die konfigurierbaren Rollen sind <strong>Specialist</strong> und <strong>Manager</strong>.
+    Admins haben immer alle Rechte.
   </p>
 
-  <table class="perm-table">
-    <thead>
-      <tr>
-        <th>Funktion</th>
-        <th>Viewer</th>
-        <th>Sales</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Board, Liste, Dashboard, Aktivität ansehen</td>
-        <td><span class="check">✓</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Tasks und Details öffnen</td>
-        <td><span class="check">✓</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Story Points (SP) bearbeiten</td>
-        <td><span class="check">✓</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Task-Status ändern (Offen → In Bearbeitung → Abgeschlossen)</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Tasks per Drag &amp; Drop verschieben</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>CSV- &amp; PDF-Export</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Neue Aufgabe direkt auf dem Board erstellen</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Standort einer Aufgabe im Detail-Fenster ändern</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="check">✓</span></td>
-      </tr>
-      <tr>
-        <td>Tasks löschen / wiedereröffnen</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="cross">—</span></td>
-      </tr>
-      <tr>
-        <td>Sprint-Sperren ändern / Admin-Bereich</td>
-        <td><span class="cross">—</span></td>
-        <td><span class="cross">—</span></td>
-      </tr>
-    </tbody>
-  </table>
+  <div id="perm-table-container">
+    <div style="padding:16px 0;color:var(--gray-500);font-size:13px;">Berechtigungen werden geladen…</div>
+  </div>
 
   <div class="callout sales-only">
     <span class="callout-icon">🟣</span>
     <div class="callout-body">
-      <strong>Sales-Hinweis in diesem Handbuch</strong>
-      <p>Abschnitte und Boxen mit diesem lila Rand beschreiben Funktionen, die nur für Sales-Nutzer verfügbar sind.</p>
+      <strong>Manager-Hinweis in diesem Handbuch</strong>
+      <p>Abschnitte und Boxen mit diesem lila Rand beschreiben Funktionen, die nur für Manager verfügbar sind (je nach Konfiguration in den Settings).</p>
     </div>
   </div>
 
@@ -596,7 +540,7 @@
     </div>
   </div>
 
-  <h3>Neue Aufgabe erstellen <span class="role sales">nur Sales</span></h3>
+  <h3>Neue Aufgabe erstellen <span class="role sales">nur Manager</span></h3>
   <p>
     Oben rechts im Board befindet sich der Button <strong>„+ Aufgabe erstellen"</strong>.
     Ein Klick öffnet ein Formular, in dem du Titel, Standort, Sprint und Story Points
@@ -607,8 +551,8 @@
   <div class="callout sales-only">
     <span class="callout-icon">🟣</span>
     <div class="callout-body">
-      <strong>Sales-Funktion</strong>
-      <p>Der Button „+ Aufgabe erstellen" ist nur für Nutzer mit der Rolle „Sales" sichtbar.</p>
+      <strong>Manager-Funktion</strong>
+      <p>Der Button „+ Aufgabe erstellen" ist nur für Nutzer mit der Rolle „Manager" sichtbar.</p>
     </div>
   </div>
 
@@ -754,8 +698,8 @@
     <li><strong>Sprint</strong>, in dem die Aufgabe liegt</li>
     <li><strong>Externe Ticket-ID</strong> (z.&thinsp;B. aus Pipedrive oder Jira), falls vorhanden</li>
     <li><strong>Story Points</strong> (editierbar – siehe unten)</li>
-    <li><strong>Standort</strong> (änderbar per Dropdown – nur Sales)</li>
-    <li><strong>Status</strong> (ggf. änderbar – Sales only)</li>
+    <li><strong>Standort</strong> (änderbar per Dropdown – nur Manager)</li>
+    <li><strong>Status</strong> (ggf. änderbar – nur Manager)</li>
     <li><strong>Beschreibung</strong> (Freitext, falls hinterlegt)</li>
     <li><strong>Kommentarfeld</strong> – für Notizen und Rückfragen</li>
     <li><strong>Erstellt von</strong> und <strong>Erstellungsdatum</strong></li>
@@ -765,7 +709,7 @@
 
   <p>Das Fenster schließt du mit dem <strong>×</strong>-Button oben rechts oder einem Klick daneben.</p>
 
-  <h3>Standort ändern <span class="role sales">nur Sales</span></h3>
+  <h3>Standort ändern <span class="role sales">nur Manager</span></h3>
   <p>
     Im Detail-Fenster kannst du den Standort einer Aufgabe direkt ändern. Wähle im
     Dropdown neben „Standort" den neuen Standort aus. Die Kapazität beider Standorte
@@ -794,13 +738,13 @@
   <p>Prioritätsänderungen erscheinen hier bewusst nicht, um den Log übersichtlich zu halten.</p>
 
   <!-- ═══ STATUS ═══ -->
-  <h2 id="status">Status ändern <span class="role sales">nur Sales</span></h2>
+  <h2 id="status">Status ändern <span class="role sales">nur Manager</span></h2>
 
   <div class="callout sales-only">
     <span class="callout-icon">🟣</span>
     <div class="callout-body">
-      <strong>Sales-Funktion</strong>
-      <p>Nur Nutzer mit der Rolle „Sales" können den Status eines Tasks ändern.</p>
+      <strong>Manager-Funktion</strong>
+      <p>Nur Nutzer mit der Rolle „Manager" können den Status eines Tasks ändern.</p>
     </div>
   </div>
 
@@ -841,8 +785,8 @@
   <div class="callout info">
     <span class="callout-icon">💡</span>
     <div class="callout-body">
-      <strong>Viewer können SP bearbeiten</strong>
-      <p>Im Gegensatz zu anderen Aktionen können auch Nutzer mit der Rolle „Viewer" Story Points ändern. Die Änderung wird sofort gespeichert.</p>
+      <strong>Specialist können SP bearbeiten</strong>
+      <p>Im Gegensatz zu anderen Aktionen können auch Nutzer mit der Rolle „Specialist" Story Points ändern (sofern in den Settings aktiviert). Die Änderung wird sofort gespeichert.</p>
     </div>
   </div>
 
@@ -862,13 +806,13 @@
   </div>
 
   <!-- ═══ VERSCHIEBEN ═══ -->
-  <h2 id="verschieben">Tasks verschieben <span class="role sales">nur Sales</span></h2>
+  <h2 id="verschieben">Tasks verschieben <span class="role sales">nur Manager</span></h2>
 
   <div class="callout sales-only">
     <span class="callout-icon">🟣</span>
     <div class="callout-body">
-      <strong>Sales-Funktion</strong>
-      <p>Nur Nutzer mit der Rolle „Sales" können Tasks per Drag &amp; Drop verschieben.</p>
+      <strong>Manager-Funktion</strong>
+      <p>Nur Nutzer mit der Rolle „Manager" können Tasks per Drag &amp; Drop verschieben.</p>
     </div>
   </div>
 
@@ -933,7 +877,7 @@
   </div>
 
   <!-- ═══ RÜCKGÄNGIG ═══ -->
-  <h2 id="rueckgaengig">Verschieben rückgängig machen <span class="role sales">nur Sales</span></h2>
+  <h2 id="rueckgaengig">Verschieben rückgängig machen <span class="role sales">nur Manager</span></h2>
   <p>
     Nach jedem erfolgreichen Verschieben erscheint unten rechts eine
     <strong>Toast-Meldung</strong> mit einem <strong>„Rückgängig"</strong>-Button.
@@ -1067,13 +1011,13 @@
   </ul>
 
   <!-- ═══ EXPORT ═══ -->
-  <h2 id="export">Export <span class="role sales">nur Sales</span></h2>
+  <h2 id="export">Export <span class="role sales">nur Manager</span></h2>
 
   <div class="callout sales-only">
     <span class="callout-icon">🟣</span>
     <div class="callout-body">
-      <strong>Sales-Funktion</strong>
-      <p>CSV- und PDF-Export sind nur für Sales-Nutzer verfügbar.</p>
+      <strong>Manager-Funktion</strong>
+      <p>CSV- und PDF-Export sind nur für Manager verfügbar.</p>
     </div>
   </div>
 
@@ -1109,14 +1053,14 @@
   <h3>Warum kann ich den Status eines Tasks nicht ändern?</h3>
   <p>Dafür kann es drei Gründe geben:</p>
   <ul>
-    <li>Du hast die Rolle <strong>Viewer</strong> – Statusänderungen sind nur für Sales.</li>
+    <li>Du hast die Rolle <strong>Specialist</strong> – Statusänderungen sind nur für Manager.</li>
     <li>Der Task ist bereits <strong>abgeschlossen</strong>.</li>
     <li>Der Sprint ist <strong>hard-gesperrt</strong>.</li>
   </ul>
 
   <h3>Warum kann ich den Task nicht verschieben?</h3>
   <ul>
-    <li>Du hast die Rolle <strong>Viewer</strong> – Drag &amp; Drop ist nur für Sales.</li>
+    <li>Du hast die Rolle <strong>Specialist</strong> – Drag &amp; Drop ist nur für Manager.</li>
     <li>Der Task hat den Status <strong>„In Bearbeitung"</strong> – setze ihn zuerst auf „Offen".</li>
     <li>Der Ziel-Sprint ist <strong>hard-gesperrt</strong>.</li>
   </ul>
@@ -1158,6 +1102,68 @@
   </p>
 
 </main>
+
+<!-- Dynamic permissions table -->
+<script>
+(async function () {
+  const container = document.getElementById("perm-table-container");
+  if (!container) return;
+
+  const GROUP_ORDER = ["Board", "Sprints", "Settings"];
+  const ROLES = [
+    { key: "viewer", label: "Specialist" },
+    { key: "sales",  label: "Manager" },
+  ];
+
+  try {
+    const res = await fetch("/api/settings/permission-defs", { credentials: "include" });
+    if (!res.ok) throw new Error("not_ok");
+    const { defs, permissions } = await res.json();
+
+    let html = "";
+    for (const group of GROUP_ORDER) {
+      const groupDefs = defs.filter(d => d.group === group);
+      if (!groupDefs.length) continue;
+
+      html += `
+        <div style="margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-500);margin-bottom:6px;">${group}</div>
+          <table class="perm-table">
+            <thead>
+              <tr>
+                <th>Berechtigung</th>
+                ${ROLES.map(r => `<th>${r.label}</th>`).join("")}
+                <th>Admin</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupDefs.map(def => `
+                <tr>
+                  <td>${def.label}</td>
+                  ${ROLES.map(r => {
+                    const has = Array.isArray(permissions[def.key]) && permissions[def.key].includes(r.key);
+                    return `<td><span class="${has ? "check" : "cross"}">${has ? "✓" : "—"}</span></td>`;
+                  }).join("")}
+                  <td><span class="check">✓</span></td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+  } catch {
+    container.innerHTML = `
+      <div class="callout warning" style="margin-top:0;">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>Nicht eingeloggt</strong>
+          <p>Die Berechtigungsübersicht ist nur für eingeloggte Nutzer sichtbar. Bitte melde dich in der App an und öffne das Handbuch erneut.</p>
+        </div>
+      </div>`;
+  }
+})();
+</script>
 
 <!-- Active nav highlight on scroll -->
 <script>
